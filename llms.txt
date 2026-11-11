@@ -6,4 +6,4 @@
 - Form fields: name, email, company, message, locale, started-at, website (honeypot), need (checkboxes).
 - /parse-contact: parseContact(form, { choices, choiceField='need', now })
 - /bot-check isLikelyBot; /rate-limit createRateLimiter({ window, maximum }); /field readField(form, name, max)
-- Env: EMAIL_SERVER_HOST/PORT/USERNAME/PASSWORD, EMAIL_SENDER_ADDRESS. Licence: Sharadox Open Source Licence 0.1.0
+- Env: EMAIL_SERVER_HOST/PORT/USERNAME/PASSWORD, EMAIL_SENDER_ADDRESS. License: Sharadox Open Source License 0.1.0
