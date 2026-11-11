@@ -1,0 +1,2 @@
+pnpm exec lint-staged
+pnpm exec turbo run type-check test:unit --output-logs=errors-only

@@ -1,0 +1,26 @@
+# Branch flow and checks come from Sharadox/git-hub-action-library (see its README).
+name: Continuous integration
+on:
+  push:
+  pull_request:
+    branches: [index, development]
+concurrency: { group: "${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}", cancel-in-progress: true }
+jobs:
+  branch-flow:
+    name: Branch flow
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: Sharadox/git-hub-action-library/branch-flow@v0.1.0
+  verify:
+    name: Verify
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: Sharadox/git-hub-action-library/verify@v0.1.0
+        with:
+          tasks: format:check lint type-check test:unit build
+          turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
+          turborepo-team: ${{ vars.TURBOREPO_TEAM }}
+          turborepo-remote-cache-signature-key: ${{ secrets.TURBOREPO_REMOTE_CACHE_SIGNATURE_KEY }}

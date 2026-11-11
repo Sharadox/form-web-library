@@ -1,0 +1,9 @@
+# @sharadox/form-web-library
+
+> Server-side forms: bot checks, rate limit, contact action emailing via @sharadox/email-web-library.
+
+- /contact-action: createContactAction({ to, senderName, senderAddress?, site, subject(message), choices?: { key: label }, rateLimit? = 5/hour, readConfiguration?, createSender?, reportError? }) → (form, ip) => { status: idle|sent|invalid|rate-limited|failed }. Reply-to = visitor; bots get fake 'sent'.
+- Form fields: name, email, company, message, locale, started-at, website (honeypot), need (checkboxes).
+- /parse-contact: parseContact(form, { choices, choiceField='need', now })
+- /bot-check isLikelyBot; /rate-limit createRateLimiter({ window, maximum }); /field readField(form, name, max)
+- Env: EMAIL_SERVER_HOST/PORT/USERNAME/PASSWORD, EMAIL_SENDER_ADDRESS. Licence: Sharadox Open Source Licence 0.1.0

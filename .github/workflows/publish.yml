@@ -1,0 +1,21 @@
+# Publishes a v<version> tag on index to npm (Sharadox/git-hub-action-library/publish).
+name: Publish
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+  id-token: write
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: Sharadox/git-hub-action-library/publish@v0.1.0
+        with:
+          tasks: format:check lint type-check test:unit build
+          npm-token: ${{ secrets.NPM_TOKEN }}
+          turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
+          turborepo-team: ${{ vars.TURBOREPO_TEAM }}
+          turborepo-remote-cache-signature-key: ${{ secrets.TURBOREPO_REMOTE_CACHE_SIGNATURE_KEY }}

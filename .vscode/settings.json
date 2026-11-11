@@ -1,0 +1,14 @@
+{
+  "workbench.editor.customLabels.patterns": {
+    "**/index.*": "${dirname}",
+    "**/index.module.scss": "${dirname} (style)",
+    "**/type.ts": "${dirname} (type)",
+    "**/*unit-test.*": "${dirname} (${filename})",
+    "**/*end-to-end-test.*": "${dirname} (${filename})",
+    "**/*benchmark-test.*": "${dirname} (${filename})"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
