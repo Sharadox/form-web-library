@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - uses: Sharadox/git-hub-action-library/branch-flow@v0.1.0
+      - uses: Sharadox/git-hub-action-library/branch-flow@v0.1.3
   verify:
     name: Verify
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: Sharadox/git-hub-action-library/verify@v0.1.0
+      - uses: Sharadox/git-hub-action-library/verify@v0.1.3
         with:
           tasks: format:check lint type-check test:unit build
           turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
