@@ -1,6 +1,6 @@
 {
   "name": "@sharadox/form-web-library",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Forms on the server: field reading, honeypot and fill-time bot checks, rate limiting and a contact form action that emails messages with the visitor as reply-to.",
   "private": false,
   "license": "SEE LICENSE IN LICENCA.md",

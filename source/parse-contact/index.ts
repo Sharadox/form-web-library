@@ -1,11 +1,7 @@
 import { isLikelyBot } from "@sharadox/form-web-library/bot-check";
+import { isEmail, isPhone } from "@sharadox/form-web-library/contact-check";
 import { readField } from "@sharadox/form-web-library/field";
 import type { ParseContactOptions, ParsedContact } from "@sharadox/form-web-library/parse-contact/type";
-
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-/** Digits with the usual phone punctuation, and at least seven digits. */
-const PHONE = /^\+?[\d\s().-]+$/;
-const isPhone = (phone: string) => PHONE.test(phone) && phone.replace(/\D/g, "").length >= 7;
 
 /**
  * Reads and validates a contact form (`name`, `email`, `phone`, `company`, `message`, `locale`, checkbox choices and
@@ -39,7 +35,7 @@ export function parseContact(
     choices: [...new Set(form.getAll(choiceField).map(String))].filter((choice) => choices.includes(choice)),
     fields: Object.fromEntries(fields.map((field) => [field, readField(form, field, 200)])),
   };
-  const emailValid = EMAIL.test(value.email);
+  const emailValid = isEmail(value.email);
   const reachable =
     reach === "email"
       ? emailValid
