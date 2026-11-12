@@ -1,9 +1,21 @@
 import type { EmailSender, EmailServerConfiguration } from "@sharadox/email-web-library";
-import type { ContactMessage } from "@sharadox/form-web-library/parse-contact/type";
+import type { ContactMessage, ContactReach } from "@sharadox/form-web-library/parse-contact/type";
 
 /** What the form shows after a submission. */
 export interface ContactState {
   status: "idle" | "sent" | "invalid" | "rate-limited" | "failed";
+}
+
+/** The words the email uses around the visitor's answers, so the inbox can read it in its own language. */
+export interface ContactLabels {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  needs: string;
+  language: string;
+  /** Before the site's name: "New message from". */
+  from: string;
 }
 
 export interface ContactActionOptions {
@@ -19,6 +31,14 @@ export interface ContactActionOptions {
   choices?: Readonly<Record<string, string>>;
   /** Where the email says the message came from, for example "sharadox.com". */
   site: string;
+  /** "email" (the default) requires an email; "email-or-phone" accepts either way of answering. */
+  reach?: ContactReach;
+  /** False lets the message be empty; true by default. */
+  requireMessage?: boolean;
+  /** Extra single-line fields the form sends, and how each is named in the email, for example `{ place: "Home" }`. */
+  fields?: Readonly<Record<string, string>>;
+  /** The email's words, in English by default. */
+  labels?: Partial<ContactLabels>;
   /** Messages per address per window; 5 per hour by default. */
   rateLimit?: { window: number; maximum: number };
   /** The email server; read from `EMAIL_SERVER_*` by default. */
