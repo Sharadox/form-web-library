@@ -27,7 +27,7 @@ export const sendContact = createContactAction({
   senderName: "Example Web Application",
   site: "example.com",
   subject: (message) =>
-    separate("•", "Contact", message.company ? `${message.name} (${message.company})` : message.name),
+    separate(SEPARATOR, "Contact", message.company ? `${message.name} (${message.company})` : message.name),
   choices: { website: "Website", logo: "Logo", other: "Others" },
 });
 ```
