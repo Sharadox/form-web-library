@@ -106,4 +106,27 @@ describe("createContactAction", () => {
     ).toBe("failed");
     expect(errors).toHaveBeenCalled();
   });
+
+  test("accepts a phone instead of an email, adds fields and speaks the inbox's language", async () => {
+    const action = create({
+      reach: "email-or-phone",
+      requireMessage: false,
+      fields: { place: "Casa" },
+      labels: { name: "Nome", phone: "Telefone", company: "Empresa", from: "Nova mensagem de" },
+    });
+    const phoneOnly = { name: "Rui", phone: "+351 912 345 678", place: "Vilamoura", "started-at": "1", locale: "pt" };
+    expect(await action(form({ ...phoneOnly, need: "logo" }), "6.6.6.6")).toEqual({ status: "sent" });
+    const message = send.mock.calls[0]![0];
+    expect(message.replyTo).toBeUndefined();
+    expect(message.text).toBe(
+      "Nome: Rui\nEmail: —\nTelefone: +351 912 345 678\nEmpresa: —\nCasa: Vilamoura\nNeeds: Logo\nLanguage: pt\nIP: 6.6.6.6",
+    );
+    expect(message.html).toContain('<a href="tel:+351912345678">+351 912 345 678</a>');
+    expect(message.html).toContain("Casa: Vilamoura");
+    expect(message.html).toContain("Nova mensagem de sharadox.com");
+    expect(message.html).not.toContain("<hr");
+    await action(form({ ...phoneOnly, place: "" }), "7.7.7.7");
+    expect(send.mock.calls[1]![0].text).toContain("Casa: —");
+    expect(send.mock.calls[1]![0].html).not.toContain("Casa:");
+  });
 });

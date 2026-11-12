@@ -6,6 +6,11 @@ Forms on the server, written once for every site:
 - **Bot checks:** a hidden honeypot field, and a minimum time to fill the form.
 - **Rate limiting:** a sliding window per key.
 - **A contact form action:** it validates, fakes success for bots, limits each address, and emails the message in text and HTML with the visitor as reply-to, through `@sharadox/email-web-library`.
+- **Options per site:**
+  - accept a phone instead of an email (`reach: "email-or-phone"`)
+  - make the message optional (`requireMessage: false`)
+  - add single-line fields (`fields: { place: "Home" }`)
+  - write the email in the inbox's language (`labels`)
 
 ## Install
 
@@ -38,7 +43,7 @@ export async function sendContactAction(_: ContactState, form: FormData) {
 
 The form sends these fields:
 
-- **text:** `name`, `email`, `company`, `message`
+- **text:** `name`, `email`, `phone`, `company`, `message`, plus any `fields` the site adds
 - **hidden:** `locale`, and `started-at` (`Date.now()` when the visitor started)
 - **checkboxes:** `need`
 - **honeypot:** `website`, kept off screen
@@ -47,13 +52,13 @@ The email server comes from `EMAIL_SERVER_*` and `EMAIL_SENDER_ADDRESS`.
 
 ## API
 
-| Import             | Export                                                                                                                                       |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `…/contact-action` | `createContactAction(options)` → `(form, ip) => Promise<ContactState>`; `ContactState` and `ContactActionOptions` in `…/contact-action/type` |
-| `…/parse-contact`  | `parseContact(form, { choices?, choiceField?, now? })` → `bot`, `invalid` or `valid`                                                         |
-| `…/bot-check`      | `isLikelyBot(form, { honeypotField?, startedAtField?, minimumFillTime?, now? })`                                                             |
-| `…/rate-limit`     | `createRateLimiter({ window, maximum })` → `(key, now?) => boolean` (kept in memory, per server instance)                                    |
-| `…/field`          | `readField(form, name, maximumLength)`                                                                                                       |
+| Import             | Export                                                                                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `…/contact-action` | `createContactAction(options)` → `(form, ip) => Promise<ContactState>`; `ENGLISH_LABELS`; `ContactState`, `ContactActionOptions` and `ContactLabels` in `…/contact-action/type` |
+| `…/parse-contact`  | `parseContact(form, { choices?, choiceField?, reach?, requireMessage?, fields?, now? })` → `bot`, `invalid` or `valid`                                                          |
+| `…/bot-check`      | `isLikelyBot(form, { honeypotField?, startedAtField?, minimumFillTime?, now? })`                                                                                                |
+| `…/rate-limit`     | `createRateLimiter({ window, maximum })` → `(key, now?) => boolean` (kept in memory, per server instance)                                                                       |
+| `…/field`          | `readField(form, name, maximumLength)`                                                                                                                                          |
 
 ## Develop
 
