@@ -25,7 +25,7 @@ export interface ContactActionOptions {
   senderName: string;
   /** The sender address (an address the email server may send from); `EMAIL_SENDER_ADDRESS` or the server user. */
   senderAddress?: string;
-  /** The email subject for a message, for example `Contact • Ana (Café)`. */
+  /** The email subject for a message, for example `Contact · Ana (Café)`. */
   subject: (message: ContactMessage) => string;
   /** Choices the form may send, and how each is named in the email; none by default. */
   choices?: Readonly<Record<string, string>>;

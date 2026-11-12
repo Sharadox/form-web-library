@@ -28,7 +28,7 @@ const create = (options: Partial<Parameters<typeof createContactAction>[0]> = {}
     to: "contact@sharadox.com",
     senderName: "Sharadox Web Application",
     site: "sharadox.com",
-    subject: (message) => `Contact • ${message.name}${message.company ? ` (${message.company})` : ""}`,
+    subject: (message) => `Contact · ${message.name}${message.company ? ` (${message.company})` : ""}`,
     choices: { logo: "Logo", other: "Others" },
     readConfiguration: () => configuration,
     createSender: () => ({ send }) as never,
@@ -49,7 +49,7 @@ describe("createContactAction", () => {
     expect(message.from).toEqual({ name: "Sharadox Web Application", address: "web@email.sharadox.com" });
     expect(message.to).toBe("contact@sharadox.com");
     expect(message.replyTo).toEqual({ name: "Ana Sá", address: "ana@example.com" });
-    expect(message.subject).toBe("Contact • Ana Sá (Café)");
+    expect(message.subject).toBe("Contact · Ana Sá (Café)");
     expect(message.text).toContain("Needs: Others, Logo\nLanguage: pt\nIP: 1.2.3.4");
     expect(message.html).toContain("&lt;b&gt;Hi&lt;/b&gt;");
     expect(message.html).toContain("Others, Logo");
