@@ -56,6 +56,7 @@ The email server comes from `EMAIL_SERVER_*` and `EMAIL_SENDER_ADDRESS`.
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `…/contact-action` | `createContactAction(options)` → `(form, ip) => Promise<ContactState>`; `ENGLISH_LABELS`; `ContactState`, `ContactActionOptions` and `ContactLabels` in `…/contact-action/type` |
 | `…/parse-contact`  | `parseContact(form, { choices?, choiceField?, reach?, requireMessage?, fields?, now? })` → `bot`, `invalid` or `valid`                                                          |
+| `…/contact-check`  | `isEmail(text)`, `isPhone(text)`: the rules the action uses, safe in the browser for checks before sending                                                                      |
 | `…/bot-check`      | `isLikelyBot(form, { honeypotField?, startedAtField?, minimumFillTime?, now? })`                                                                                                |
 | `…/rate-limit`     | `createRateLimiter({ window, maximum })` → `(key, now?) => boolean` (kept in memory, per server instance)                                                                       |
 | `…/field`          | `readField(form, name, maximumLength)`                                                                                                                                          |
