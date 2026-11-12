@@ -1,6 +1,7 @@
 import { createEmailSender, EmailError, readEmailServerConfiguration } from "@sharadox/email-web-library";
 import { escapeHtml } from "@sharadox/web-library/html/escape";
 import { separate } from "@sharadox/web-library/text/separate";
+import { SEPARATOR } from "@sharadox/web-library/text/separator";
 import { createRateLimiter } from "@sharadox/form-web-library/rate-limit";
 import { parseContact } from "@sharadox/form-web-library/parse-contact";
 import type { ContactActionOptions, ContactLabels, ContactState } from "@sharadox/form-web-library/contact-action/type";
@@ -26,7 +27,7 @@ export const ENGLISH_LABELS: ContactLabels = {
  *
  * @example
  * const sendContact = createContactAction({ to: "contact@sharadox.com", senderName: "Sharadox Web Application",
- *   site: "sharadox.com", subject: (message) => separate("•", "Contact", message.name) });
+ *   site: "sharadox.com", subject: (message) => separate(SEPARATOR, "Contact", message.name) });
  * // in a "use server" file:
  * export async function sendContactAction(_: ContactState, form: FormData) { return sendContact(form, ip); }
  */
@@ -80,7 +81,7 @@ export function createContactAction({
     const details = extra.filter(([, value]) => value);
     const html = `<div style="font-family:-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.6;color:#111">
     <p style="color:#666;font-size:13px;margin:0 0 16px">${escapeHtml(labels.from)} ${escapeHtml(site)} (${escapeHtml(message.locale)})</p>
-    <p style="margin:0">${separate("·", `<b>${escapeHtml(message.name)}</b>`, message.company && escapeHtml(message.company))}<br>${separate("·", ...contacts)}</p>
+    <p style="margin:0">${separate(SEPARATOR, `<b>${escapeHtml(message.name)}</b>`, message.company && escapeHtml(message.company))}<br>${separate(SEPARATOR, ...contacts)}</p>
     ${details.length ? `<p style="margin:12px 0 0;color:#444">${details.map(([label, value]) => `${escapeHtml(label)}: ${escapeHtml(value)}`).join("<br>")}</p>` : ""}
     ${named.length ? `<p style="margin:12px 0 0;color:#444">${escapeHtml(named.join(", "))}</p>` : ""}
     ${message.message ? `<hr style="border:0;border-top:1px solid #eee;margin:18px 0">\n    <p style="white-space:pre-wrap;margin:0">${escapeHtml(message.message)}</p>` : ""}</div>`;

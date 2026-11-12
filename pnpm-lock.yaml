@@ -12,8 +12,8 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1
       '@sharadox/web-library':
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^0.7.0
+        version: 0.7.0
     devDependencies:
       '@sharadox/es-lint-configuration-web-library':
         specifier: ^0.1.1
@@ -373,9 +373,9 @@ packages:
       '@vitest/coverage-v8': '>=5'
       vitest: '>=5'
 
-  '@sharadox/web-library@0.5.0':
-    resolution: {integrity: sha512-umMmDM2MtqUO9F+d6B2YUK9yljoh+mn5vBTTd1CLXNboqtInYi1ak8sntIAkiMe0MsIOOlZV9g2QStXUJUiWCQ==}
-    engines: {node: '>=24'}
+  '@sharadox/web-library@0.7.0':
+    resolution: {integrity: sha512-7UWzK5z2iKtw1l4wFJiB2Z77qCNFWpYd24+7MWFLvHkrDqIvv6y6+VDjqvbWlrMzRD8D46RdhRPMT5b50Of0lA==}
+    engines: {node: '>=26'}
 
   '@shikijs/engine-oniguruma@3.23.0':
     resolution: {integrity: sha512-1nWINwKXxKKLqPibT5f4pAFLej9oZzQTsby8942OTlsJzOBZ0MWKiwzMsd+jhzu8YPCHAswGnnN1YtQfirL35g==}
@@ -1592,7 +1592,7 @@ snapshots:
       - oxc-transform-react
       - vite
 
-  '@sharadox/web-library@0.5.0': {}
+  '@sharadox/web-library@0.7.0': {}
 
   '@shikijs/engine-oniguruma@3.23.0':
     dependencies:
