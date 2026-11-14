@@ -49,6 +49,13 @@ describe("parseContact", () => {
     expect(parseContact(form({ ...valid, ...change }), { now: 10_000 }).kind).toBe("invalid");
   });
 
+  test("asks for a longer message and at least one choice when told to", () => {
+    const options = { choices: ["logo"], minimumMessageLength: 10, requireChoice: true, now: 10_000 };
+    expect(parseContact(form({ ...valid, need: "logo" }), options).kind).toBe("invalid");
+    expect(parseContact(form({ ...valid, message: "Hello there", need: "hack" }), options).kind).toBe("invalid");
+    expect(parseContact(form({ ...valid, message: "Hello there", need: "logo" }), options).kind).toBe("valid");
+  });
+
   test("caps field lengths and works with the defaults", () => {
     const parsed = parseContact(form({ ...valid, "started-at": "", message: "a".repeat(6000) }));
     expect(parsed.kind === "valid" && parsed.value.message.length).toBe(5000);

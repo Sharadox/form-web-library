@@ -31,6 +31,10 @@ export interface ParseContactOptions {
   reach?: ContactReach;
   /** False lets the message be empty; true by default. */
   requireMessage?: boolean;
+  /** The fewest characters a required message may have, after trimming; 1 by default. */
+  minimumMessageLength?: number;
+  /** True requires at least one allowed choice; false by default. */
+  requireChoice?: boolean;
   /** Extra single-line text fields to read, for example `["place"]`. */
   fields?: readonly string[];
   /** Now, for the fill-time check (tests). */

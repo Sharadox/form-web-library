@@ -85,6 +85,24 @@ describe("createContactAction", () => {
     expect((await action(form(valid), "5.5.5.5")).status).toBe("rate-limited");
   });
 
+  test("limits everyone together per day, after each address", async () => {
+    const action = create({ dailyMaximum: 2, rateLimit: { window: 60_000, maximum: 1 } });
+    expect((await action(form(valid), "6.6.6.1")).status).toBe("sent");
+    expect((await action(form(valid), "6.6.6.1")).status).toBe("rate-limited");
+    expect((await action(form(valid), "6.6.6.2")).status).toBe("sent");
+    expect((await action(form(valid), "6.6.6.3")).status).toBe("rate-limited");
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  test("passes the message length and choice rules on", async () => {
+    const action = create({ minimumMessageLength: 20, requireChoice: true });
+    expect((await action(form({ ...valid, need: "logo" }), "7.7.7.7")).status).toBe("invalid");
+    expect((await action(form({ ...valid, message: "A message long enough." }), "7.7.7.7")).status).toBe("invalid");
+    expect((await action(form({ ...valid, message: "A message long enough.", need: "logo" }), "7.7.7.7")).status).toBe(
+      "sent",
+    );
+  });
+
   test("reports failures, and invalid messages refused by the email library", async () => {
     const reportError = vi.fn();
     send.mockRejectedValueOnce(new Error("refused"));

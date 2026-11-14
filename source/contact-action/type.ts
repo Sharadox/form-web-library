@@ -35,12 +35,21 @@ export interface ContactActionOptions {
   reach?: ContactReach;
   /** False lets the message be empty; true by default. */
   requireMessage?: boolean;
+  /** The fewest characters a required message may have; 1 by default. */
+  minimumMessageLength?: number;
+  /** True requires at least one choice; false by default. */
+  requireChoice?: boolean;
   /** Extra single-line fields the form sends, and how each is named in the email, for example `{ place: "Home" }`. */
   fields?: Readonly<Record<string, string>>;
   /** The email's words, in English by default. */
   labels?: Partial<ContactLabels>;
   /** Messages per address per window; 5 per hour by default. */
   rateLimit?: { window: number; maximum: number };
+  /**
+   * Emails sent per day from everyone together, 50 by default: a ceiling on what a flood from many addresses can cost
+   * in email sending. Kept by each server instance; past it, visitors are told to try later.
+   */
+  dailyMaximum?: number;
   /** The email server; read from `EMAIL_SERVER_*` by default. */
   readConfiguration?: () => EmailServerConfiguration;
   createSender?: (configuration: EmailServerConfiguration) => EmailSender;

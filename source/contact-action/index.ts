@@ -21,7 +21,7 @@ export const ENGLISH_LABELS: ContactLabels = {
 
 /**
  * Builds the work of a contact form's server action: checks for bots (they get a fake success), validates, limits
- * each address, then emails the message in plain text and HTML (user input escaped), with the visitor as reply-to
+ * each address and everyone together per day (`dailyMaximum`, so a flood can't run up the email bill), then emails the message in plain text and HTML (user input escaped), with the visitor as reply-to
  * when they left an email. Sites can accept a phone instead of an email (`reach`), make the message optional, add
  * fields and write the email in their own language (`labels`).
  *
@@ -40,25 +40,32 @@ export function createContactAction({
   site,
   reach = "email",
   requireMessage = true,
+  minimumMessageLength = 1,
+  requireChoice = false,
   fields = {},
   labels: givenLabels = {},
   rateLimit = { window: 60 * 60 * 1000, maximum: 5 },
+  dailyMaximum = 50,
   readConfiguration = readEmailServerConfiguration,
   createSender = createEmailSender,
   reportError = (message, error) => console.error(message, error),
 }: ContactActionOptions): (form: FormData, ip: string) => Promise<ContactState> {
   const allow = createRateLimiter(rateLimit);
+  const allowToday = createRateLimiter({ window: 24 * 60 * 60 * 1000, maximum: dailyMaximum });
   const labels = { ...ENGLISH_LABELS, ...givenLabels };
   return async (form, ip) => {
     const parsed = parseContact(form, {
       choices: Object.keys(choices),
       reach,
       requireMessage,
+      minimumMessageLength,
+      requireChoice,
       fields: Object.keys(fields),
     });
     if (parsed.kind === "bot") return { status: "sent" };
     if (parsed.kind === "invalid") return { status: "invalid" };
-    if (!allow(ip)) return { status: "rate-limited" };
+    // Each address first, so one address can't use up everyone's daily emails.
+    if (!allow(ip) || !allowToday("everyone")) return { status: "rate-limited" };
     const message = parsed.value;
     const named = message.choices.map((choice) => choices[choice]!);
     const extra = Object.entries(fields).map(([field, label]) => [label, message.fields[field]!] as const);
