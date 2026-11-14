@@ -7,7 +7,8 @@ import type { ParseContactOptions, ParsedContact } from "@sharadox/form-web-libr
  * Reads and validates a contact form (`name`, `email`, `phone`, `company`, `message`, `locale`, checkbox choices and
  * any extra `fields`), and flags likely bots (honeypot filled or submitted too fast). Fields are trimmed and capped in
  * length. By default an email and a message are required; `reach: "email-or-phone"` accepts either way of answering,
- * and `requireMessage: false` an empty message.
+ * `requireMessage: false` an empty message, `minimumMessageLength` asks for a longer one and `requireChoice` for at
+ * least one choice.
  *
  * @example
  * const parsed = parseContact(form, { choices: ["website", "logo", "other"] });
@@ -20,6 +21,8 @@ export function parseContact(
     choiceField = "need",
     reach = "email",
     requireMessage = true,
+    minimumMessageLength = 1,
+    requireChoice = false,
     fields = [],
     now = Date.now(),
   }: ParseContactOptions = {},
@@ -40,6 +43,8 @@ export function parseContact(
     reach === "email"
       ? emailValid
       : (value.email || value.phone) !== "" && (!value.email || emailValid) && (!value.phone || isPhone(value.phone));
-  if (!value.name || (requireMessage && !value.message) || !reachable) return { kind: "invalid" };
+  const messageMissing = requireMessage && value.message.length < minimumMessageLength;
+  const choiceMissing = requireChoice && value.choices.length === 0;
+  if (!value.name || messageMissing || choiceMissing || !reachable) return { kind: "invalid" };
   return { kind: "valid", value };
 }
