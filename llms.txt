@@ -2,8 +2,8 @@
 
 > Server-side forms: bot checks, rate limit, contact action emailing via @sharadox/email-web-library.
 
-- /contact-action: createContactAction({ to, senderName, senderAddress?, site, subject(message), choices?: { key: label }, reach? = 'email' | 'email-or-phone', requireMessage? = true, fields?: { name: label }, labels?: Partial<ContactLabels> (English default, ENGLISH_LABELS), rateLimit? = 5/hour, readConfiguration?, createSender?, reportError? }) → (form, ip) => { status: idle|sent|invalid|rate-limited|failed }. Reply-to = visitor when they gave an email; bots get fake 'sent'.
+- /contact-action: createContactAction({ to, senderName, senderAddress?, site, subject(message), choices?: { key: label }, reach? = 'email' | 'email-or-phone', requireMessage? = true, minimumMessageLength? = 1, requireChoice? = false, fields?: { name: label }, labels?: Partial<ContactLabels> (English default, ENGLISH_LABELS), rateLimit? = 5/hour per address, dailyMaximum? = 50 emails/day from everyone (per server instance; caps email cost under a flood), readConfiguration?, createSender?, reportError? }) → (form, ip) => { status: idle|sent|invalid|rate-limited|failed }. Reply-to = visitor when they gave an email; bots get fake 'sent'.
 - Form fields: name, email, phone (valid: + digits spaces ().- with ≥7 digits), company, message, extra fields, locale, started-at, website (honeypot), need (checkboxes).
-- /parse-contact: parseContact(form, { choices, choiceField='need', reach, requireMessage, fields, now }) → value { name, email, phone, company, message, locale, choices, fields }
+- /parse-contact: parseContact(form, { choices, choiceField='need', reach, requireMessage, minimumMessageLength, requireChoice, fields, now }) → value { name, email, phone, company, message, locale, choices, fields }
 - /contact-check isEmail(text), isPhone(text) (browser-safe, same rules as the server); /bot-check isLikelyBot; /rate-limit createRateLimiter({ window, maximum }); /field readField(form, name, max)
 - Env: EMAIL_SERVER_HOST/PORT/USERNAME/PASSWORD, EMAIL_SENDER_ADDRESS. License: Sharadox Open Source License 0.1.0

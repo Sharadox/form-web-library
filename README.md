@@ -5,10 +5,11 @@ Forms on the server, written once for every site:
 - **Field reading:** trimmed and capped in length.
 - **Bot checks:** a hidden honeypot field, and a minimum time to fill the form.
 - **Rate limiting:** a sliding window per key.
-- **A contact form action:** it validates, fakes success for bots, limits each address, and emails the message in text and HTML with the visitor as reply-to, through `@sharadox/email-web-library`.
+- **A contact form action:** it validates, fakes success for bots, limits each address and everyone together per day (50 emails by default, `dailyMaximum`, so a flood from many addresses can't run up the email bill), and emails the message in text and HTML with the visitor as reply-to, through `@sharadox/email-web-library`.
 - **Options per site:**
   - accept a phone instead of an email (`reach: "email-or-phone"`)
-  - make the message optional (`requireMessage: false`)
+  - make the message optional (`requireMessage: false`) or ask for a longer one (`minimumMessageLength`)
+  - require at least one choice (`requireChoice: true`)
   - add single-line fields (`fields: { place: "Home" }`)
   - write the email in the inbox's language (`labels`)
 
@@ -55,7 +56,7 @@ The email server comes from `EMAIL_SERVER_*` and `EMAIL_SENDER_ADDRESS`.
 | Import             | Export                                                                                                                                                                          |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `…/contact-action` | `createContactAction(options)` → `(form, ip) => Promise<ContactState>`; `ENGLISH_LABELS`; `ContactState`, `ContactActionOptions` and `ContactLabels` in `…/contact-action/type` |
-| `…/parse-contact`  | `parseContact(form, { choices?, choiceField?, reach?, requireMessage?, fields?, now? })` → `bot`, `invalid` or `valid`                                                          |
+| `…/parse-contact`  | `parseContact(form, { choices?, choiceField?, reach?, requireMessage?, minimumMessageLength?, requireChoice?, fields?, now? })` → `bot`, `invalid` or `valid`                   |
 | `…/contact-check`  | `isEmail(text)`, `isPhone(text)`: the rules the action uses, safe in the browser for checks before sending                                                                      |
 | `…/bot-check`      | `isLikelyBot(form, { honeypotField?, startedAtField?, minimumFillTime?, now? })`                                                                                                |
 | `…/rate-limit`     | `createRateLimiter({ window, maximum })` → `(key, now?) => boolean` (kept in memory, per server instance)                                                                       |
