@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { EmailError } from "@sharadox/email-web-library";
-import { createContactAction } from "@sharadox/form-web-library/contact-action";
+import { createContactAction, formPage } from "@sharadox/form-web-library/contact-action";
 
 const send = vi.fn();
 const configuration = {
@@ -22,16 +22,35 @@ const valid = {
   company: "Café",
   "started-at": "1",
   locale: "pt",
+  page: "https://development.sharadox.com/pt#contact",
+};
+const now = () => new Date("2026-11-17T21:30:00Z");
+const logo = async () => ({ content: new Uint8Array([1, 2, 3]), contentType: "image/png", filename: "logo.png" });
+const acknowledgement = {
+  en: {
+    subject: "Sharadox · We received your message",
+    eyebrow: "Message received",
+    heading: (name: string) => `Thank you, ${name}.`,
+    paragraphs: ["We'll reply soon."],
+    messageLabel: "Your message",
+  },
+  pt: {
+    subject: "Sharadox · Recebemos a sua mensagem",
+    eyebrow: "Mensagem recebida",
+    heading: (name: string) => `Obrigado, ${name}.`,
+    paragraphs: ["Respondemos em breve."],
+    messageLabel: "A sua mensagem",
+  },
 };
 const create = (options: Partial<Parameters<typeof createContactAction>[0]> = {}) =>
   createContactAction({
     to: "contact@sharadox.com",
-    senderName: "Sharadox Web Application",
+    company: "Sharadox",
     site: "sharadox.com",
-    subject: (message) => `Contact · ${message.name}${message.company ? ` (${message.company})` : ""}`,
     choices: { logo: "Logo", other: "Others" },
     readConfiguration: () => configuration,
     createSender: () => ({ send }) as never,
+    now,
     ...options,
   });
 
@@ -42,26 +61,91 @@ beforeEach(() => {
 });
 
 describe("createContactAction", () => {
-  test("emails the inbox with the visitor as reply-to, choices named and input escaped", async () => {
+  test("emails the company as its web application, the visitor as reply-to, every detail in its layout", async () => {
     vi.stubEnv("EMAIL_SENDER_ADDRESS", "contact@web.sharadox.com");
-    expect(await create()(form({ ...valid, need: ["other", "logo"] }), "1.2.3.4")).toEqual({ status: "sent" });
+    expect(await create({ logo })(form({ ...valid, need: ["other", "logo"] }), "1.2.3.4")).toEqual({ status: "sent" });
     const message = send.mock.calls[0]![0];
     expect(message.from).toEqual({ name: "Sharadox Web Application", address: "contact@web.sharadox.com" });
     expect(message.to).toBe("contact@sharadox.com");
     expect(message.replyTo).toEqual({ name: "Ana Sá", address: "ana@example.com" });
-    expect(message.subject).toBe("Contact · Ana Sá (Café)");
-    expect(message.text).toContain("Needs: Others, Logo\nLanguage: pt\nIP: 1.2.3.4");
+    expect(message.subject).toBe("Sharadox Web Application · Contact · Ana Sá (Café)");
+    expect(message.text).toBe(
+      "Name: Ana\nSá\nEmail: ana@example.com\nCompany: Café\nNeeds: Others, Logo\n\nMessage:\n<b>Hi</b>\n\n" +
+        "Form: https://development.sharadox.com/pt#contact\nLanguage: Português\nSent: 2026-11-17 21:30 UTC\nIP: 1.2.3.4",
+    );
+    expect(message.html).toContain('<img src="cid:logo"');
     expect(message.html).toContain("&lt;b&gt;Hi&lt;/b&gt;");
-    expect(message.html).toContain("Others, Logo");
-    expect(message.html).toContain("New message from sharadox.com (pt)");
+    expect(message.html).toContain('href="mailto:ana@example.com"');
+    expect(message.html).toContain('href="https://development.sharadox.com/pt#contact"');
+    expect(message.inlineImages).toEqual([
+      { id: "logo", content: new Uint8Array([1, 2, 3]), contentType: "image/png", filename: "logo.png" },
+    ]);
+    // No acknowledgement given: no automatic reply.
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  test("replies automatically in the visitor's language, the company as reply-to", async () => {
+    await create({ logo, acknowledgement })(form(valid), "1.2.3.4");
+    const reply = send.mock.calls[1]![0];
+    expect(reply.to).toEqual({ name: "Ana Sá", address: "ana@example.com" });
+    expect(reply.replyTo).toBe("contact@sharadox.com");
+    expect(reply.from.name).toBe("Sharadox Web Application");
+    expect(reply.subject).toBe("Sharadox · Recebemos a sua mensagem");
+    expect(reply.text).toBe("Obrigado, Ana\nSá.\n\nRespondemos em breve.\n\nA sua mensagem:\n<b>Hi</b>");
+    expect(reply.html).toContain('lang="pt"');
+    expect(reply.html).toContain('href="https://development.sharadox.com"');
+    expect(reply.inlineImages).toHaveLength(1);
+    // A language without its own reply gets the first one; no message, no quote; no page, the site.
+    await create({ acknowledgement })(
+      form({ ...valid, locale: "de", message: "", page: "https://evil.example/x" }),
+      "1.2.3.5",
+    ).catch(() => {});
+    await create({ acknowledgement, requireMessage: false })(
+      form({ ...valid, locale: "de", message: "", page: "https://evil.example/x" }),
+      "1.2.3.6",
+    );
+    const other = send.mock.calls.at(-1)![0];
+    expect(other.subject).toBe("Sharadox · We received your message");
+    expect(other.text).toBe("Thank you, Ana\nSá.\n\nWe'll reply soon.");
+    expect(other.html).toContain('href="https://sharadox.com"');
+    expect(other.inlineImages).toEqual([]);
+    expect(send.mock.calls.at(-2)![0].text).toContain("Form: sharadox.com\nLanguage: Deutsch");
+  });
+
+  test("never replies without an email, and a failed reply still counts the message as sent", async () => {
+    const reportError = vi.fn();
+    const action = create({ acknowledgement, reach: "email-or-phone", reportError });
+    await action(form({ ...valid, email: "", phone: "+351 912 345 678" }), "8.8.8.1");
+    expect(send).toHaveBeenCalledTimes(1);
+    send.mockResolvedValueOnce({}).mockRejectedValueOnce(new Error("bounced"));
+    expect((await action(form(valid), "8.8.8.2")).status).toBe("sent");
+    expect(reportError).toHaveBeenCalledWith("contact: the automatic reply failed", expect.any(Error));
+  });
+
+  test("names an unknown language by its code, and previews a reply without paragraphs by its subject", async () => {
+    const quiet = { ...acknowledgement.en, paragraphs: [] };
+    await create({ acknowledgement: { xx: quiet } })(form({ ...valid, locale: "xx" }), "9.9.9.9");
+    expect(send.mock.calls[0]![0].text).toContain("Language: xx");
+    expect(send.mock.calls[1]![0].html).toContain("Sharadox · We received your message</div>");
+  });
+
+  test("shows the form's page only on the site's own domain", () => {
+    expect(formPage("https://sharadox.com/en#contact", "sharadox.com")).toBe("https://sharadox.com/en#contact");
+    expect(formPage("https://a.development.sharadox.com/", "sharadox.com")).toBe("https://a.development.sharadox.com/");
+    expect(formPage("https://notsharadox.com/", "sharadox.com")).toBeUndefined();
+    expect(formPage("http://sharadox.com/", "sharadox.com")).toBeUndefined();
+    expect(formPage("not a url", "sharadox.com")).toBeUndefined();
+    expect(formPage(null, "sharadox.com")).toBeUndefined();
+    expect(formPage(`https://sharadox.com/${"a".repeat(500)}`, "sharadox.com")).toBeUndefined();
   });
 
   test("falls back to the server user as sender, and leaves empty fields out", async () => {
     await create({ senderAddress: undefined })(form({ ...valid, company: "" }), "1.2.3.4");
     const message = send.mock.calls[0]![0];
     expect(message.from.address).toBe("user");
-    expect(message.text).toContain("Company: —\nNeeds: —");
-    expect(message.html).not.toContain("color:#444");
+    expect(message.subject).toBe("Sharadox Web Application · Contact · Ana Sá");
+    expect(message.text).not.toContain("Company:");
+    expect(message.text).not.toContain("Needs:");
   });
 
   test("uses a given sender address and the defaults for choices", async () => {
@@ -112,7 +196,7 @@ describe("createContactAction", () => {
     expect((await create()(form(valid), "2.2.2.2")).status).toBe("invalid");
     const errors = vi.spyOn(console, "error").mockImplementation(() => {});
     send.mockRejectedValueOnce(new Error("down"));
-    expect((await create({ reportError: undefined })(form(valid), "3.3.3.3")).status).toBe("failed");
+    expect((await create({ reportError: undefined, now: undefined })(form(valid), "3.3.3.3")).status).toBe("failed");
     expect(errors).toHaveBeenCalled();
   });
 
@@ -130,21 +214,23 @@ describe("createContactAction", () => {
       reach: "email-or-phone",
       requireMessage: false,
       fields: { place: "Casa" },
-      labels: { name: "Nome", phone: "Telefone", company: "Empresa", from: "Nova mensagem de" },
+      labels: { name: "Nome", phone: "Telefone", company: "Empresa", contact: "Contacto", page: "Formulário" },
+      languageNames: { pt: "Português" },
+      theme: { background: "#000000", foreground: "#e2c27a", accent: "#c79a43" },
     });
     const phoneOnly = { name: "Rui", phone: "+351 912 345 678", place: "Vilamoura", "started-at": "1", locale: "pt" };
     expect(await action(form({ ...phoneOnly, need: "logo" }), "6.6.6.6")).toEqual({ status: "sent" });
     const message = send.mock.calls[0]![0];
     expect(message.replyTo).toBeUndefined();
+    expect(message.subject).toBe("Sharadox Web Application · Contacto · Rui");
     expect(message.text).toBe(
-      "Nome: Rui\nEmail: —\nTelefone: +351 912 345 678\nEmpresa: —\nCasa: Vilamoura\nNeeds: Logo\nLanguage: pt\nIP: 6.6.6.6",
+      "Nome: Rui\nTelefone: +351 912 345 678\nCasa: Vilamoura\nNeeds: Logo\n\n" +
+        "Formulário: sharadox.com\nLanguage: Português\nSent: 2026-11-17 21:30 UTC\nIP: 6.6.6.6",
     );
-    expect(message.html).toContain('<a href="tel:+351912345678">+351 912 345 678</a>');
-    expect(message.html).toContain("Casa: Vilamoura");
-    expect(message.html).toContain("Nova mensagem de sharadox.com");
-    expect(message.html).not.toContain("<hr");
+    expect(message.html).toContain('href="tel:+351912345678"');
+    expect(message.html).toContain("color:#e2c27a");
+    expect(message.html).not.toContain("cid:logo");
     await action(form({ ...phoneOnly, place: "" }), "7.7.7.7");
-    expect(send.mock.calls[1]![0].text).toContain("Casa: —");
-    expect(send.mock.calls[1]![0].html).not.toContain("Casa:");
+    expect(send.mock.calls[1]![0].text).not.toContain("Casa:");
   });
 });

@@ -25,12 +25,31 @@ pnpm add @sharadox/form-web-library
 // the site's library
 export const sendContact = createContactAction({
   to: "contact@example.com",
-  senderName: "Example Web Application",
+  company: "Example", // from "Example Web Application", subject "Example Web Application · Contact · Ana (Café)"
   site: "example.com",
-  subject: (message) =>
-    separate(SEPARATOR, "Contact", message.company ? `${message.name} (${message.company})` : message.name),
   choices: { website: "Website", logo: "Logo", other: "Others" },
+  logo: async () => ({ content: await readFile(LOGO), contentType: "image/png", filename: "logo.png" }),
+  theme: { background: "#000000", foreground: "#ffffff", accent: "#ffffff" },
+  acknowledgement: {
+    en: {
+      subject: "Example · We received your message",
+      eyebrow: "Message received",
+      heading: (name) => `Thank you, ${name}.`,
+      paragraphs: ["We'll get back to you shortly."],
+      messageLabel: "Your message",
+    },
+  },
 });
+```
+
+Every email has the same layout: the company's logo and name on its colors at the top, then the visitor's name
+(and company), every detail they gave, their message, and at the bottom the page the form was sent from, the
+language, the time and the IP address. Replying answers the visitor. With `acknowledgement`, a visitor who left an
+email also gets an automatic reply in their language, with their message, and replying to it reaches the company.
+`…/contact-email` (`brandedEmailHtml`) draws the layout, for any other email a site sends.
+
+```ts
+
 ```
 
 ```ts
@@ -45,7 +64,7 @@ export async function sendContactAction(_: ContactState, form: FormData) {
 The form sends these fields:
 
 - **text:** `name`, `email`, `phone`, `company`, `message`, plus any `fields` the site adds
-- **hidden:** `locale`, and `started-at` (`Date.now()` when the visitor started)
+- **hidden:** `locale`, `started-at` (`Date.now()` when the visitor started) and `page` (`location.href` when sending; shown only when it's on the site's domain)
 - **checkboxes:** `need`
 - **honeypot:** `website`, kept off screen
 
@@ -53,14 +72,15 @@ The email server comes from `EMAIL_SERVER_*` and `EMAIL_SENDER_ADDRESS`.
 
 ## API
 
-| Import             | Export                                                                                                                                                                          |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `…/contact-action` | `createContactAction(options)` → `(form, ip) => Promise<ContactState>`; `ENGLISH_LABELS`; `ContactState`, `ContactActionOptions` and `ContactLabels` in `…/contact-action/type` |
-| `…/parse-contact`  | `parseContact(form, { choices?, choiceField?, reach?, requireMessage?, minimumMessageLength?, requireChoice?, fields?, now? })` → `bot`, `invalid` or `valid`                   |
-| `…/contact-check`  | `isEmail(text)`, `isPhone(text)`: the rules the action uses, safe in the browser for checks before sending                                                                      |
-| `…/bot-check`      | `isLikelyBot(form, { honeypotField?, startedAtField?, minimumFillTime?, now? })`                                                                                                |
-| `…/rate-limit`     | `createRateLimiter({ window, maximum })` → `(key, now?) => boolean` (kept in memory, per server instance)                                                                       |
-| `…/field`          | `readField(form, name, maximumLength)`                                                                                                                                          |
+| Import             | Export                                                                                                                                                                                                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `…/contact-action` | `createContactAction(options)` → `(form, ip) => Promise<ContactState>`; `ENGLISH_LABELS`, `PLAIN_THEME`, `LANGUAGE_NAMES`, `formPage(value, site)`; `ContactState`, `ContactActionOptions`, `ContactLabels`, `ContactAcknowledgement` and `EmailLogo` in `…/contact-action/type` |
+| `…/contact-email`  | `brandedEmailHtml({ company, theme, logo, language, preview, eyebrow, heading, paragraphs?, rows?, quote?, footer? })`: the company's email layout (logo as `cid:logo`)                                                                                                          |
+| `…/parse-contact`  | `parseContact(form, { choices?, choiceField?, reach?, requireMessage?, minimumMessageLength?, requireChoice?, fields?, now? })` → `bot`, `invalid` or `valid`                                                                                                                    |
+| `…/contact-check`  | `isEmail(text)`, `isPhone(text)`: the rules the action uses, safe in the browser for checks before sending                                                                                                                                                                       |
+| `…/bot-check`      | `isLikelyBot(form, { honeypotField?, startedAtField?, minimumFillTime?, now? })`                                                                                                                                                                                                 |
+| `…/rate-limit`     | `createRateLimiter({ window, maximum })` → `(key, now?) => boolean` (kept in memory, per server instance)                                                                                                                                                                        |
+| `…/field`          | `readField(form, name, maximumLength)`                                                                                                                                                                                                                                           |
 
 ## Develop
 
