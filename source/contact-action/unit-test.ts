@@ -43,10 +43,10 @@ beforeEach(() => {
 
 describe("createContactAction", () => {
   test("emails the inbox with the visitor as reply-to, choices named and input escaped", async () => {
-    vi.stubEnv("EMAIL_SENDER_ADDRESS", "web@email.sharadox.com");
+    vi.stubEnv("EMAIL_SENDER_ADDRESS", "contact@web.sharadox.com");
     expect(await create()(form({ ...valid, need: ["other", "logo"] }), "1.2.3.4")).toEqual({ status: "sent" });
     const message = send.mock.calls[0]![0];
-    expect(message.from).toEqual({ name: "Sharadox Web Application", address: "web@email.sharadox.com" });
+    expect(message.from).toEqual({ name: "Sharadox Web Application", address: "contact@web.sharadox.com" });
     expect(message.to).toBe("contact@sharadox.com");
     expect(message.replyTo).toEqual({ name: "Ana Sá", address: "ana@example.com" });
     expect(message.subject).toBe("Contact · Ana Sá (Café)");
