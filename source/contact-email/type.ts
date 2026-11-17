@@ -29,7 +29,7 @@ export interface BrandedEmailOptions {
   eyebrow: string;
   heading: string;
   /** Paragraphs under the heading. */
-  paragraphs?: string[];
+  paragraphs?: readonly string[];
   /** The details table. */
   rows?: EmailRow[];
   /** A longer text in its own box, keeping its line breaks (the visitor's message), with its label. */
