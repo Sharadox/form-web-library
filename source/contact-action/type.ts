@@ -32,7 +32,7 @@ export interface ContactAcknowledgement {
   /** The heading, from the visitor's name, for example `Thank you, ${name}.`. */
   heading: (name: string) => string;
   /** What happens next. */
-  paragraphs: string[];
+  paragraphs: readonly string[];
   /** Above their message: "Your message". */
   messageLabel: string;
   /** The small capitals above the heading, for example "Message received". */
