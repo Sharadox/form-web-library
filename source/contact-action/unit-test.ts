@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { EmailError } from "@sharadox/email-web-library";
-import { createContactAction, formPage } from "@sharadox/form-web-library/contact-action";
+import { createContactAction, plainDesign, formPage } from "@sharadox/form-web-library/contact-action";
 
 const send = vi.fn();
 const configuration = {
@@ -77,6 +77,7 @@ describe("createContactAction", () => {
     expect(message.html).toContain("&lt;b&gt;Hi&lt;/b&gt;");
     expect(message.html).toContain('href="mailto:ana@example.com"');
     expect(message.html).toContain('href="https://development.sharadox.com/pt#contact"');
+    expect(message.html).toContain(">Reply to Ana</a>");
     expect(message.inlineImages).toEqual([
       { id: "logo", content: new Uint8Array([1, 2, 3]), contentType: "image/png", filename: "logo.png" },
     ]);
@@ -216,7 +217,7 @@ describe("createContactAction", () => {
       fields: { place: "Casa" },
       labels: { name: "Nome", phone: "Telefone", company: "Empresa", contact: "Contacto", page: "Formulário" },
       languageNames: { pt: "Português" },
-      theme: { background: "#000000", foreground: "#e2c27a", accent: "#c79a43" },
+      design: { ...plainDesign("Sharadox"), colors: { ...plainDesign("Sharadox").colors, accent: "#c79a43" } },
     });
     const phoneOnly = { name: "Rui", phone: "+351 912 345 678", place: "Vilamoura", "started-at": "1", locale: "pt" };
     expect(await action(form({ ...phoneOnly, need: "logo" }), "6.6.6.6")).toEqual({ status: "sent" });
@@ -228,9 +229,55 @@ describe("createContactAction", () => {
         "Formulário: sharadox.com\nLanguage: Português\nSent: 2026-11-17 21:30 UTC\nIP: 6.6.6.6",
     );
     expect(message.html).toContain('href="tel:+351912345678"');
-    expect(message.html).toContain("color:#e2c27a");
+    expect(message.html).toContain("background-color:#c79a43");
+    // Only a phone: the button calls them.
+    expect(message.html).toContain('href="tel:+351912345678" style="display:inline-block');
+    expect(message.html).toContain(">Call Rui</a>");
     expect(message.html).not.toContain("cid:logo");
     await action(form({ ...phoneOnly, place: "" }), "7.7.7.7");
     expect(send.mock.calls[1]![0].text).not.toContain("Casa:");
   });
+});
+
+test("the automatic reply carries the site's button, and the company's signature instead of a line to its site", async () => {
+  const send = vi.fn(async () => ({ messageId: "x", accepted: ["contact@sharadox.com"], rejected: [] }));
+  const action = createContactAction({
+    to: "contact@sharadox.com",
+    company: "Sharadox",
+    site: "sharadox.com",
+    design: { ...plainDesign("Sharadox"), signature: [{ text: "sharadox.com", href: "https://sharadox.com" }] },
+    acknowledgement: {
+      en: {
+        subject: "Sharadox · We received your message",
+        heading: (name: string) => `Thank you, ${name}.`,
+        paragraphs: ["We'll reply soon."],
+        messageLabel: "Your message",
+        eyebrow: "Message received",
+        button: { label: "Visit sharadox.com", href: "https://sharadox.com" },
+      },
+    },
+    readConfiguration: () => ({
+      host: "smtp.example.com",
+      port: 587,
+      security: "starttls",
+      username: "web@sharadox.com",
+      password: "x",
+    }),
+    createSender: () => ({ send, verify: async () => {} }),
+    now: () => new Date("2026-11-17T21:30:00Z"),
+  });
+  const data = new FormData();
+  for (const [key, value] of Object.entries({
+    name: "Ana Sá",
+    email: "ana@example.com",
+    message: "Hello there",
+    "started-at": "1",
+    locale: "en",
+  }))
+    data.set(key, value);
+  expect(await action(data, "8.8.8.8")).toEqual({ status: "sent" });
+  const reply = (send.mock.calls[1] as unknown as [{ html: string }])[0].html;
+  expect(reply).toContain(">Visit sharadox.com</a>");
+  expect(reply).toContain('<span style="white-space:nowrap"><a href="https://sharadox.com"');
+  expect(reply).not.toContain("Sharadox: <a");
 });
