@@ -1,7 +1,7 @@
 {
   "name": "@sharadox/form-web-library",
-  "version": "0.5.1",
-  "description": "Forms on the server: field reading, honeypot and fill-time bot checks, rate limiting and a contact form action that emails messages with the visitor as reply-to.",
+  "version": "0.6.0",
+  "description": "Forms: a phone field with every country's flag and calling code, and on the server field reading, honeypot and fill-time bot checks, rate limiting and a contact form action that emails messages with the visitor as reply-to.",
   "private": false,
   "license": "SEE LICENSE IN LICENCA.md",
   "author": "Sharadox <contact@sharadox.com>",
@@ -27,7 +27,9 @@
     "NOTICE.md",
     "llms.txt"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "engines": {
     "node": ">=26"
   },
@@ -36,7 +38,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rm -rf distribution && tsc -p tsconfig.build.json",
+    "build": "library-build",
     "lint": "eslint --max-warnings=0 .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -61,16 +63,24 @@
   "homepage": "https://github.com/Sharadox/form-web-library#readme",
   "devDependencies": {
     "@sharadox/es-lint-configuration-web-library": "^0.1.1",
+    "@sharadox/library-build-web-library": "^0.1.2",
     "@sharadox/prettier-configuration-web-library": "^0.1.0",
     "@sharadox/turborepo-configuration-web-library": "^0.1.0",
     "@sharadox/type-script-configuration-web-library": "^0.2.0",
     "@sharadox/vitest-configuration-web-library": "^0.1.2",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitest/coverage-v8": "^5.1.0",
     "eslint": "9.39.5",
+    "happy-dom": "^21.0.4",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "prettier": "^3.10.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "turbo": "^2.11.10",
     "typedoc": "^0.28.20",
     "typescript": "6.0.3",
@@ -78,6 +88,15 @@
   },
   "dependencies": {
     "@sharadox/email-web-library": "^0.4.0",
+    "@sharadox/icon-web-library": "^0.6.0",
     "@sharadox/web-library": "^0.7.0"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }

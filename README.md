@@ -1,6 +1,12 @@
 # @sharadox/form-web-library
 
-Forms on the server, written once for every site:
+Forms, written once for every site.
+
+In the browser:
+
+- **A phone field (`phone-field`):** a button with the country's flag and calling code opens a searchable list of every country, named in the page's language, and the number box beside it takes digits only. Pasting "+44…" or "0044…" picks the country. The form receives one field with "+351 912345678". Its colors come from the text and the `--phone-field-*` variables (`-line`, `-accent`, `-surface`, `-popover`, `-radius`, `-gap`). Flags come from `@sharadox/icon-web-library` and load on their own, after the field.
+
+On the server:
 
 - **Field reading:** trimmed and capped in length.
 - **Bot checks:** a hidden honeypot field, and a minimum time to fill the form.
@@ -12,6 +18,19 @@ Forms on the server, written once for every site:
   - require at least one choice (`requireChoice: true`)
   - add single-line fields (`fields: { place: "Home" }`)
   - write the email in the inbox's language (`labels`)
+
+```tsx
+<PhoneField
+  name="phone"
+  locale="pt"
+  defaultCountry="PT"
+  labels={{ country: "País", search: "Procurar" }}
+  inputProps={{ id: "phone", "aria-describedby": "phone-error" }}
+  inputClassName={styles.input}
+/>
+```
+
+Also: `calling-code` (`CALLING_CODES` by country, `MAIN_CALLING_COUNTRY` for shared codes) and `phone-number` (`readPhone(text, country)`, `fullPhone(country, digits)`).
 
 ## Install
 
