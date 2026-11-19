@@ -29,7 +29,7 @@ export const sendContact = createContactAction({
   site: "example.com",
   choices: { website: "Website", logo: "Logo", other: "Others" },
   logo: async () => ({ content: await readFile(LOGO), contentType: "image/png", filename: "logo.png" }),
-  theme: { background: "#000000", foreground: "#ffffff", accent: "#ffffff" },
+  design: { background: "#000000", foreground: "#ffffff", accent: "#ffffff" },
   acknowledgement: {
     en: {
       subject: "Example · We received your message",
@@ -46,7 +46,7 @@ Every email has the same layout: the company's logo and name on its colors at th
 (and company), every detail they gave, their message, and at the bottom the page the form was sent from, the
 language, the time and the IP address. Replying answers the visitor. With `acknowledgement`, a visitor who left an
 email also gets an automatic reply in their language, with their message, and replying to it reaches the company.
-`…/contact-email` (`brandedEmailHtml`) draws the layout, for any other email a site sends.
+The emails are laid out by email-web-library's `emailLayout` in the brand's `design` (its `EmailDesign`), which a site also uses for any other email it sends.
 
 ```ts
 
@@ -75,7 +75,6 @@ The email server comes from `EMAIL_SERVER_*` and `EMAIL_SENDER_ADDRESS`.
 | Import             | Export                                                                                                                                                                                                                                                                           |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `…/contact-action` | `createContactAction(options)` → `(form, ip) => Promise<ContactState>`; `ENGLISH_LABELS`, `PLAIN_THEME`, `LANGUAGE_NAMES`, `formPage(value, site)`; `ContactState`, `ContactActionOptions`, `ContactLabels`, `ContactAcknowledgement` and `EmailLogo` in `…/contact-action/type` |
-| `…/contact-email`  | `brandedEmailHtml({ company, theme, logo, language, preview, eyebrow, heading, paragraphs?, rows?, quote?, footer? })`: the company's email layout (logo as `cid:logo`)                                                                                                          |
 | `…/parse-contact`  | `parseContact(form, { choices?, choiceField?, reach?, requireMessage?, minimumMessageLength?, requireChoice?, fields?, now? })` → `bot`, `invalid` or `valid`                                                                                                                    |
 | `…/contact-check`  | `isEmail(text)`, `isPhone(text)`: the rules the action uses, safe in the browser for checks before sending                                                                                                                                                                       |
 | `…/bot-check`      | `isLikelyBot(form, { honeypotField?, startedAtField?, minimumFillTime?, now? })`                                                                                                                                                                                                 |

@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@sharadox/email-web-library':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.4.0
+        version: 0.4.0
       '@sharadox/web-library':
         specifier: ^0.7.0
         version: 0.7.0
@@ -334,8 +334,8 @@ packages:
   '@rolldown/pluginutils@1.1.0':
     resolution: {integrity: sha512-K+NU2HDCEem4sClgHH4ZZXwdJeNFkJo+hRk479DIwdIviAPN2hFJH1KHHwg8CxHQXvi0M5XY4deTXINfIiSG6w==}
 
-  '@sharadox/email-web-library@0.3.0':
-    resolution: {integrity: sha512-OHA8zrEB9oZGN9UFhHhHhPOdlHLt6lavvjrFNBg0d+Svbk9/ZsG3e6Uxc/7O4e9Kfi+gSW9soLPQD/LlqYOpQg==}
+  '@sharadox/email-web-library@0.4.0':
+    resolution: {integrity: sha512-Hcb+UWL6ZCSycNJI5VqOVHNSR/XTigIX68mUU0CItTMjC3/Xw3xLqwqpCtf7LcDyM/U3TwRytLwqOWSlqmkB7A==}
     engines: {node: '>=26'}
 
   '@sharadox/es-lint-configuration-web-library@0.1.1':
@@ -1556,8 +1556,9 @@ snapshots:
 
   '@rolldown/pluginutils@1.1.0': {}
 
-  '@sharadox/email-web-library@0.3.0':
+  '@sharadox/email-web-library@0.4.0':
     dependencies:
+      '@sharadox/web-library': 0.7.0
       nodemailer: 10.5.0
 
   '@sharadox/es-lint-configuration-web-library@0.1.1(eslint@9.39.5)(typescript@6.0.3)':

@@ -1,9 +1,7 @@
-import { createEmailSender, EmailError, readEmailServerConfiguration } from "@sharadox/email-web-library";
-import type { InlineImage } from "@sharadox/email-web-library";
+import { createEmailSender, EmailError, emailLayout, readEmailServerConfiguration } from "@sharadox/email-web-library";
+import type { EmailDesign, EmailRow, InlineImage } from "@sharadox/email-web-library";
 import { separate } from "@sharadox/web-library/text/separate";
 import { SEPARATOR } from "@sharadox/web-library/text/separator";
-import { brandedEmailHtml } from "@sharadox/form-web-library/contact-email";
-import type { EmailRow, EmailTheme } from "@sharadox/form-web-library/contact-email/type";
 import { createRateLimiter } from "@sharadox/form-web-library/rate-limit";
 import { parseContact } from "@sharadox/form-web-library/parse-contact";
 import type { ContactActionOptions, ContactLabels, ContactState } from "@sharadox/form-web-library/contact-action/type";
@@ -22,10 +20,39 @@ export const ENGLISH_LABELS: ContactLabels = {
   message: "Message",
   page: "Form",
   sent: "Sent",
+  reply: "Reply to",
+  call: "Call",
 };
 
-/** Black and white, when the site gives no colors. */
-export const PLAIN_THEME: EmailTheme = { background: "#000000", foreground: "#ffffff", accent: "#ffffff" };
+/** Black on white, plainly, when the site gives no design of its own. */
+export const plainDesign = (company: string): EmailDesign => ({
+  name: company,
+  logo: { width: 44, height: 44 },
+  wordmark: true,
+  align: "left",
+  colors: {
+    page: "#f4f4f5",
+    card: "#ffffff",
+    edge: "#e4e4e7",
+    text: "#09090b",
+    muted: "#3f3f46",
+    quiet: "#71717a",
+    rule: "#ececec",
+    accent: "#09090b",
+    box: "#f6f6f7",
+    onAccent: "#ffffff",
+  },
+  fonts: {
+    heading: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    body: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    label: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+  },
+  heading: { size: 24, weight: 600, letterSpacing: "-0.02em", lineHeight: 1.3 },
+  label: { size: 11, letterSpacing: "0.12em" },
+  rule: "solid",
+  radius: 16,
+  button: { radius: 999, uppercase: false, letterSpacing: "0" },
+});
 
 /** Common languages' names, when the site gives none. */
 export const LANGUAGE_NAMES: Readonly<Record<string, string>> = {
@@ -55,8 +82,8 @@ export function formPage(value: ReturnType<FormData["get"]>, site: string): stri
 /**
  * Builds the work of a contact form's server action: checks for bots (they get a fake success), validates, limits
  * each address and everyone together per day (`dailyMaximum`, so a flood can't run up the email bill), then emails
- * the company in its own layout: the logo and name at the top, every detail the visitor gave, their message, and the
- * page, language, time and IP at the bottom. It comes from "<company> Web Application" with the subject
+ * the company in its own design (`design`): its logo at the top, every detail the visitor gave, their message, a
+ * button to answer them, and the page, language, time and IP at the bottom. It comes from "<company> Web Application" with the subject
  * "<company> Web Application · Contact · Name (Company)", and replying answers the visitor. When the visitor left an
  * email and the site gives an `acknowledgement`, they get an automatic reply in their language with their message,
  * which the company can be reached by replying to. Sites can accept a phone instead of an email (`reach`), make the
@@ -72,7 +99,7 @@ export function createContactAction({
   company,
   senderAddress,
   logo,
-  theme = PLAIN_THEME,
+  design: givenDesign,
   languageNames = LANGUAGE_NAMES,
   acknowledgement,
   choices = {},
@@ -94,6 +121,7 @@ export function createContactAction({
   const allowToday = createRateLimiter({ window: 24 * 60 * 60 * 1000, maximum: dailyMaximum });
   const labels = { ...ENGLISH_LABELS, ...givenLabels };
   const senderName = `${company} Web Application`;
+  const design = givenDesign ?? plainDesign(company);
   return async (form, ip) => {
     const parsed = parseContact(form, {
       choices: Object.keys(choices),
@@ -113,6 +141,11 @@ export function createContactAction({
     const sent = `${now().toISOString().slice(0, 16).replace("T", " ")} UTC`;
     const named = message.choices.map((choice) => choices[choice]!);
     const who = message.company ? `${message.name} (${message.company})` : message.name;
+    const firstName = message.name.split(/\s+/)[0]!;
+    // The one thing to do: answer by email, or call when only a phone was left.
+    const answer = message.email
+      ? { label: `${labels.reply} ${firstName}`, href: `mailto:${message.email}` }
+      : { label: `${labels.call} ${firstName}`, href: `tel:${message.phone.replace(/[^\d+]/g, "")}` };
     const rows: EmailRow[] = [
       { label: labels.name, value: message.name },
       ...(message.email ? [{ label: labels.email, value: message.email, href: `mailto:${message.email}` }] : []),
@@ -153,18 +186,20 @@ export function createContactAction({
         ...(message.email ? { replyTo: { name: oneLine(message.name), address: message.email } } : {}),
         subject: oneLine(separate(SEPARATOR, senderName, labels.contact, who)).slice(0, 300),
         text,
-        html: brandedEmailHtml({
-          company,
-          theme,
-          logo: Boolean(image),
-          language: "en",
-          preview: separate(SEPARATOR, who, named.join(", ")),
-          eyebrow: labels.contact,
-          heading: who,
-          rows,
-          ...(message.message ? { quote: { label: labels.message, text: message.message } } : {}),
-          footer,
-        }),
+        html: emailLayout(
+          {
+            language: "en",
+            preview: separate(SEPARATOR, who, named.join(", ")),
+            eyebrow: labels.contact,
+            heading: who,
+            rows,
+            ...(message.message ? { quote: { label: labels.message, text: message.message } } : {}),
+            button: answer,
+            footer,
+          },
+          design,
+          Boolean(image),
+        ),
         inlineImages,
       });
       // The automatic reply: never stops the message itself from counting as sent.
@@ -182,24 +217,31 @@ export function createContactAction({
               ...reply.paragraphs,
               ...(message.message ? ["", `${reply.messageLabel}:`, message.message] : []),
             ].join("\n"),
-            html: brandedEmailHtml({
-              company,
-              theme,
-              logo: Boolean(image),
-              language: message.locale,
-              preview: reply.paragraphs[0] ?? reply.subject,
-              eyebrow: reply.eyebrow,
-              heading: reply.heading(message.name),
-              paragraphs: reply.paragraphs,
-              ...(message.message ? { quote: { label: reply.messageLabel, text: message.message } } : {}),
-              footer: [
-                {
-                  label: company,
-                  value: page ? new URL(page).origin.replace("https://", "") : site,
-                  href: page ? new URL(page).origin : `https://${site}`,
-                },
-              ],
-            }),
+            html: emailLayout(
+              {
+                language: message.locale,
+                preview: reply.paragraphs[0] ?? reply.subject,
+                eyebrow: reply.eyebrow,
+                heading: reply.heading(message.name),
+                paragraphs: reply.paragraphs,
+                ...(message.message ? { quote: { label: reply.messageLabel, text: message.message } } : {}),
+                ...(reply.button ? { button: reply.button } : {}),
+                // The company's own signature says where it is; without one, a line to its site does.
+                ...(design.signature?.length
+                  ? {}
+                  : {
+                      footer: [
+                        {
+                          label: company,
+                          value: page ? new URL(page).origin.replace("https://", "") : site,
+                          href: page ? new URL(page).origin : `https://${site}`,
+                        },
+                      ],
+                    }),
+              },
+              design,
+              Boolean(image),
+            ),
             inlineImages,
           });
         } catch (error) {
