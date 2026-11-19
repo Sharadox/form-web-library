@@ -29,7 +29,7 @@ export const sendContact = createContactAction({
   site: "example.com",
   choices: { website: "Website", logo: "Logo", other: "Others" },
   logo: async () => ({ content: await readFile(LOGO), contentType: "image/png", filename: "logo.png" }),
-  design: { background: "#000000", foreground: "#ffffff", accent: "#ffffff" },
+  design: EXAMPLE_EMAIL, // the brand's EmailDesign (email-web-library): colors, type, rules, header, signature
   acknowledgement: {
     en: {
       subject: "Example · We received your message",
@@ -37,6 +37,7 @@ export const sendContact = createContactAction({
       heading: (name) => `Thank you, ${name}.`,
       paragraphs: ["We'll get back to you shortly."],
       messageLabel: "Your message",
+      button: { label: "Visit example.com", href: "https://example.com" }, // optional
     },
   },
 });
