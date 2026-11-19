@@ -1,5 +1,4 @@
-import type { EmailSender, EmailServerConfiguration } from "@sharadox/email-web-library";
-import type { EmailTheme } from "@sharadox/form-web-library/contact-email/type";
+import type { EmailDesign, EmailSender, EmailServerConfiguration } from "@sharadox/email-web-library";
 import type { ContactReach } from "@sharadox/form-web-library/parse-contact/type";
 
 /** What the form shows after a submission. */
@@ -23,6 +22,10 @@ export interface ContactLabels {
   page: string;
   /** When it was sent: "Sent". */
   sent: string;
+  /** The button that answers the visitor, before their first name: "Reply to". */
+  reply: string;
+  /** The button that calls a visitor who left only a phone, before their first name: "Call". */
+  call: string;
 }
 
 /** The automatic reply to the visitor, in one language: thanks, what happens next, and their message back. */
@@ -37,6 +40,8 @@ export interface ContactAcknowledgement {
   messageLabel: string;
   /** The small capitals above the heading, for example "Message received". */
   eyebrow: string;
+  /** A button under their message, for example to the site. */
+  button?: { label: string; href: string };
 }
 
 /** The company's logo at the top of every email: a square image (PNG), sent inside the email. */
@@ -58,8 +63,11 @@ export interface ContactActionOptions {
   senderAddress?: string;
   /** The company's logo, at the top of every email. */
   logo?: () => Promise<EmailLogo>;
-  /** The brand's colors for the top of every email; black and white by default. */
-  theme?: EmailTheme;
+  /**
+   * The brand's design for its emails (email-web-library's `EmailDesign`: colors, type, rules, header, button,
+   * signature), so they look like its website; plain black on white by default.
+   */
+  design?: EmailDesign;
   /** Each language's name in the email, by code; English names of common languages by default. */
   languageNames?: Readonly<Record<string, string>>;
   /**
