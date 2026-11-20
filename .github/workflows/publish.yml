@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: Sharadox/git-hub-action-library/publish@v0.1.6
         with:
-          tasks: format:check lint type-check test:unit build
+          tasks: format:check lint type-check test:unit test:benchmark build
           npm-token: ${{ secrets.NPM_TOKEN }}
           turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
           turborepo-team: ${{ vars.TURBOREPO_TEAM }}
