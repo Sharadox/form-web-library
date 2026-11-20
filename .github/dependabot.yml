@@ -7,6 +7,7 @@ updates:
     groups:
       minor-and-patch: { update-types: [minor, patch] }
     ignore:
+      # ESLint stays on 9 in every repository until eslint-config-next and the shared standard move to 10 together.
       - dependency-name: eslint
         update-types: [version-update:semver-major]
       - dependency-name: "@eslint/js"
