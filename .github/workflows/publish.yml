@@ -1,21 +1,47 @@
-# Publishes a v<version> tag on index to npm (Sharadox/git-hub-action-library/publish).
+# Publishes to npm (Sharadox/git-hub-action-library): v<version> tags on index as releases, development and
+# <feature>.development pushes as prereleases under their own tag, and removes a deleted feature's tag.
 name: Publish
 on:
   push:
     tags: ["v*"]
+    branches: [development, "*.development"]
+  delete:
 permissions:
   contents: write
   id-token: write
+concurrency: { group: "${{ github.workflow }}-${{ github.ref }}", cancel-in-progress: true }
 jobs:
   publish:
     name: Publish
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: Sharadox/git-hub-action-library/publish@v0.1.6
+      - uses: Sharadox/git-hub-action-library/publish@v0.2.0
         with:
           tasks: format:check lint type-check test:unit test:benchmark build
           npm-token: ${{ secrets.NPM_TOKEN }}
           turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
           turborepo-team: ${{ vars.TURBOREPO_TEAM }}
           turborepo-remote-cache-signature-key: ${{ secrets.TURBOREPO_REMOTE_CACHE_SIGNATURE_KEY }}
+  prerelease:
+    name: Prerelease
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: Sharadox/git-hub-action-library/prerelease@v0.2.0
+        with:
+          npm-token: ${{ secrets.NPM_TOKEN }}
+          turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
+          turborepo-team: ${{ vars.TURBOREPO_TEAM }}
+          turborepo-remote-cache-signature-key: ${{ secrets.TURBOREPO_REMOTE_CACHE_SIGNATURE_KEY }}
+  prerelease-cleanup:
+    name: Prerelease cleanup
+    if: github.event_name == 'delete' && github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: Sharadox/git-hub-action-library/prerelease-cleanup@v0.2.0
+        with:
+          npm-token: ${{ secrets.NPM_TOKEN }}
