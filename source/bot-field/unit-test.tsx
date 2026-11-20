@@ -22,6 +22,19 @@ test("records when the form appeared and hides a honeypot, as isLikelyBot reads 
   vi.restoreAllMocks();
 });
 
+test("keeps the moment the form appeared when the form renders again", () => {
+  vi.spyOn(Date, "now").mockReturnValue(1000);
+  const form = (label: string) => (
+    <form>
+      <BotFields honeypotLabel={label} />
+    </form>
+  );
+  const { container, rerender } = render(form("Website"));
+  rerender(form("Site"));
+  expect(new FormData(container.querySelector("form")!).get("started-at")).toBe("1000");
+  vi.restoreAllMocks();
+});
+
 test("takes other field names and label", () => {
   const { container } = render(<BotFields honeypotField="url" startedAtField="opened" honeypotLabel="Site" />);
   expect(container.querySelector('[name="url"]')).not.toBeNull();
