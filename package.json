@@ -1,6 +1,6 @@
 {
   "name": "@sharadox/form-web-library",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Forms: a phone field with every country's flag and calling code, and on the server field reading, honeypot and fill-time bot checks, rate limiting and a contact form action that emails messages with the visitor as reply-to.",
   "private": false,
   "license": "SEE LICENSE IN LICENCA.md",
@@ -25,7 +25,8 @@
     "LICENCA.md",
     "LICENSE.md",
     "NOTICE.md",
-    "llms.txt"
+    "llms.txt",
+    "CHANGELOG.md"
   ],
   "sideEffects": [
     "**/*.css"

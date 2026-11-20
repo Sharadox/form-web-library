@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import type { BotFieldsProperties } from "@sharadox/form-web-library/bot-field/type";
 
 /** Out of sight but still in the form, so robots that fill every field give themselves away. */
@@ -18,13 +18,13 @@ export function BotFields({
   startedAtField = "started-at",
   honeypotLabel = "Website",
 }: BotFieldsProperties) {
-  const startedAt = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    startedAt.current!.value = String(Date.now());
-  }, []);
+  // Held in state, not written into the field: React puts a hidden field back to its default whenever the form renders
+  // again, which would silently turn the fill-time check off.
+  const [startedAt, setStartedAt] = useState(0);
+  useEffect(() => setStartedAt(Date.now()), []);
   return (
     <>
-      <input ref={startedAt} type="hidden" name={startedAtField} defaultValue="0" />
+      <input type="hidden" name={startedAtField} value={startedAt} readOnly />
       <div style={HIDDEN} aria-hidden>
         <label>
           {honeypotLabel}
