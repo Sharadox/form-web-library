@@ -33,7 +33,10 @@ export interface ContactLabels {
 
 /** The automatic reply to the visitor, in one language: thanks, what happens next, and their message back. */
 export interface ContactAcknowledgement {
-  /** For example "We received your message": the sender already names the company, so the subject doesn't. */
+  /**
+   * For example "We received your message": the sender already names the company, so the subject doesn't; the
+   * form's name goes before it ("Contact · We received your message").
+   */
   subject: string;
   /** The heading, from the visitor's name, for example `Thank you, ${name}.`. */
   heading: (name: string) => string;

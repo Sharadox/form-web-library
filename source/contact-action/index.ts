@@ -115,7 +115,8 @@ export function formPage(value: ReturnType<FormData["get"]>, site: string): stri
  * button to answer them, and the page, language, time and IP at the bottom, all in the language the visitor used the
  * form in. It comes from the company by name, with the subject "Contact · Name (Company)" ("Contacto · …" in
  * Portuguese), and replying answers the visitor. When the visitor left an
- * email and the site gives an `acknowledgement`, they get an automatic reply in their language with their message,
+ * email and the site gives an `acknowledgement`, they get an automatic reply in their language with their message
+ * (its subject also starting with the form's name: "Contact · We received your message"),
  * which the company can be reached by replying to. Sites can accept a phone instead of an email (`reach`), make the
  * message optional, add fields and give the email's words in more languages (`labels`).
  *
@@ -242,7 +243,8 @@ export function createContactAction({
             from,
             to: { name: oneLine(message.name), address: message.email },
             replyTo: to,
-            subject: oneLine(reply.subject).slice(0, 300),
+            // The form's name first, as on every email the form sends: "Contact · We received your message".
+            subject: oneLine(separated(labels.contact, reply.subject)).slice(0, 300),
             text: [
               reply.heading(message.name),
               "",

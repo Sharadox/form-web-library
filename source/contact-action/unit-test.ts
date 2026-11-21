@@ -28,14 +28,14 @@ const now = () => new Date("2026-11-17T21:30:00Z");
 const logo = async () => ({ content: new Uint8Array([1, 2, 3]), contentType: "image/png", filename: "logo.png" });
 const acknowledgement = {
   en: {
-    subject: "Sharadox · We received your message",
+    subject: "We received your message",
     eyebrow: "Message received",
     heading: (name: string) => `Thank you, ${name}.`,
     paragraphs: ["We'll reply soon."],
     messageLabel: "Your message",
   },
   pt: {
-    subject: "Sharadox · Recebemos a sua mensagem",
+    subject: "Recebemos a sua mensagem",
     eyebrow: "Mensagem recebida",
     heading: (name: string) => `Obrigado, ${name}.`,
     paragraphs: ["Respondemos em breve."],
@@ -93,7 +93,7 @@ describe("createContactAction", () => {
     expect(reply.to).toEqual({ name: "Ana Sá", address: "ana@example.com" });
     expect(reply.replyTo).toBe("contact@sharadox.com");
     expect(reply.from.name).toBe("Sharadox");
-    expect(reply.subject).toBe("Sharadox · Recebemos a sua mensagem");
+    expect(reply.subject).toBe("Contacto · Recebemos a sua mensagem");
     expect(reply.text).toBe("Obrigado, Ana\nSá.\n\nRespondemos em breve.\n\nA sua mensagem:\n<b>Hi</b>");
     expect(reply.html).toContain('lang="pt"');
     expect(reply.html).toContain('href="https://development.sharadox.com"');
@@ -108,7 +108,7 @@ describe("createContactAction", () => {
       "1.2.3.6",
     );
     const other = send.mock.calls.at(-1)![0];
-    expect(other.subject).toBe("Sharadox · We received your message");
+    expect(other.subject).toBe("Contact · We received your message");
     expect(other.text).toBe("Thank you, Ana\nSá.\n\nWe'll reply soon.");
     expect(other.html).toContain('href="https://sharadox.com"');
     expect(other.inlineImages).toEqual([]);
@@ -130,7 +130,7 @@ describe("createContactAction", () => {
     const quiet = { ...acknowledgement.en, paragraphs: [] };
     await create({ acknowledgement: { xx: quiet } })(form({ ...valid, locale: "xx" }), "9.9.9.9");
     expect(send.mock.calls[0]![0].text).toContain("Language: xx");
-    expect(send.mock.calls[1]![0].html).toContain("Sharadox · We received your message</div>");
+    expect(send.mock.calls[1]![0].html).toContain("We received your message</div>");
   });
 
   test("shows the form's page only on the site's own domain", () => {
@@ -257,7 +257,7 @@ test("the automatic reply carries the site's button, and the company's signature
     design: { ...plainDesign("Sharadox"), signature: [{ text: "sharadox.com", href: "https://sharadox.com" }] },
     acknowledgement: {
       en: {
-        subject: "Sharadox · We received your message",
+        subject: "We received your message",
         heading: (name: string) => `Thank you, ${name}.`,
         paragraphs: ["We'll reply soon."],
         messageLabel: "Your message",
