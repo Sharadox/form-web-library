@@ -49,29 +49,18 @@ export const sendContact = createContactAction({
   choices: { website: "Website", logo: "Logo", other: "Others" },
   logo: async () => ({ content: await readFile(LOGO), contentType: "image/png", filename: "logo.png" }),
   design: EXAMPLE_EMAIL, // the brand's EmailDesign (email-web-library): logo size, color, fonts, signature
-  acknowledgement: {
-    en: {
-      subject: "Example · We received your message",
-      eyebrow: "Message received",
-      heading: (name) => `Thank you, ${name}.`,
-      paragraphs: ["We'll get back to you shortly."],
-      messageLabel: "Your message",
-      button: { label: "Visit example.com", href: "https://example.com" }, // optional
-    },
-  },
+  acknowledgement: contactAcknowledgement("https://example.com"), // the automatic reply every site sends
 });
 ```
 
 Every email has the same layout, black on white so every mail app shows it alike: the company's logo at the top
-left, the visitor's name in the brand's color
-(and company), every detail they gave, their message, and at the bottom the page the form was sent from, the
+left, the visitor's name (and company) in the brand's color,, every detail they gave, their message, and at the bottom the page the form was sent from, the
 language, the time and the IP address. Replying answers the visitor. With `acknowledgement`, a visitor who left an
 email also gets an automatic reply in their language, with their message, and replying to it reaches the company.
+`contactAcknowledgement(site)` (`…/contact-acknowledgement`) gives every site's reply the same words, in English and
+Portuguese: "Contact · We received your message" ("Contacto · Recebemos a sua mensagem"), thanks by name, a reply
+within one working day, the message back and a button to the site.
 The emails are laid out by email-web-library's `emailLayout` in the brand's `design` (its `EmailDesign`), which a site also uses for any other email it sends.
-
-```ts
-
-```
 
 ```ts
 // the application's server action
