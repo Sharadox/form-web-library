@@ -8,6 +8,7 @@ What changed in each version of `@sharadox/form-web-library`, newest first.
 - Its subject is the form's name and the visitor's: "Contact · Ana (Café)".
 - It is in the language the visitor used the form in: built-in English and Portuguese words (`CONTACT_LABELS`), `labels` by language, and choices and fields named in each language.
 - The automatic reply's subject starts with the form's name too: "Contact · We received your message".
+- The emails use email-web-library's one simple layout, black on white, so every mail app shows them alike; `plainDesign` is black with the logo and name, and a site's `design` brings only its logo size, color, fonts and signature.
 
 ## 0.6.1
 

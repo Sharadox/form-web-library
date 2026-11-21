@@ -221,7 +221,7 @@ describe("createContactAction", () => {
       labels: { pt: { needs: "Criações" }, en: { contact: "Booking" } },
       languageNames: { pt: "Português" },
       senderName: "Sharadox Studio",
-      design: { ...plainDesign("Sharadox"), colors: { ...plainDesign("Sharadox").colors, accent: "#c79a43" } },
+      design: { ...plainDesign("Sharadox"), color: "#c79a43" },
     });
     const phoneOnly = { name: "Rui", phone: "+351 912 345 678", place: "Vilamoura", "started-at": "1", locale: "pt" };
     expect(await action(form({ ...phoneOnly, need: "logo" }), "6.6.6.6")).toEqual({ status: "sent" });
@@ -287,7 +287,9 @@ test("the automatic reply carries the site's button, and the company's signature
   expect(await action(data, "8.8.8.8")).toEqual({ status: "sent" });
   const reply = (send.mock.calls[1] as unknown as [{ html: string }])[0].html;
   expect(reply).toContain(">Visit sharadox.com</a>");
-  expect(reply).toContain('<span style="white-space:nowrap"><a href="https://sharadox.com"');
+  expect(reply).toContain(
+    '<a href="https://sharadox.com" style="color:#71717a;text-decoration:underline">sharadox.com</a>',
+  );
   expect(reply).not.toContain("Sharadox: <a");
 });
 

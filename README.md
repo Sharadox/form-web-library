@@ -48,7 +48,7 @@ export const sendContact = createContactAction({
   site: "example.com",
   choices: { website: "Website", logo: "Logo", other: "Others" },
   logo: async () => ({ content: await readFile(LOGO), contentType: "image/png", filename: "logo.png" }),
-  design: EXAMPLE_EMAIL, // the brand's EmailDesign (email-web-library): colors, type, rules, header, signature
+  design: EXAMPLE_EMAIL, // the brand's EmailDesign (email-web-library): logo size, color, fonts, signature
   acknowledgement: {
     en: {
       subject: "Example · We received your message",
@@ -62,7 +62,8 @@ export const sendContact = createContactAction({
 });
 ```
 
-Every email has the same layout: the company's logo and name on its colors at the top, then the visitor's name
+Every email has the same layout, black on white so every mail app shows it alike: the company's logo at the top
+left, the visitor's name in the brand's color
 (and company), every detail they gave, their message, and at the bottom the page the form was sent from, the
 language, the time and the IP address. Replying answers the visitor. With `acknowledgement`, a visitor who left an
 email also gets an automatic reply in their language, with their message, and replying to it reaches the company.

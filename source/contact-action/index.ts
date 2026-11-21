@@ -53,34 +53,12 @@ export function textIn(text: ContactText, locale: string): string {
   return text[locale] ?? text.en ?? Object.values(text)[0]!;
 }
 
-/** Black on white, plainly, when the site gives no design of its own. */
+/** Black, with the logo (when the site gives one) and the company's name, when the site gives no design of its own. */
 export const plainDesign = (company: string): EmailDesign => ({
   name: company,
   logo: { width: 44, height: 44 },
   wordmark: true,
-  align: "left",
-  colors: {
-    page: "#f4f4f5",
-    card: "#ffffff",
-    edge: "#e4e4e7",
-    text: "#09090b",
-    muted: "#3f3f46",
-    quiet: "#71717a",
-    rule: "#ececec",
-    accent: "#09090b",
-    box: "#f6f6f7",
-    onAccent: "#ffffff",
-  },
-  fonts: {
-    heading: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    body: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    label: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-  },
-  heading: { size: 24, weight: 600, letterSpacing: "-0.02em", lineHeight: 1.3 },
-  label: { size: 11, letterSpacing: "0.12em" },
-  rule: "solid",
-  radius: 16,
-  button: { radius: 999, uppercase: false, letterSpacing: "0" },
+  color: "#000000",
 });
 
 /** Common languages' names, when the site gives none. */

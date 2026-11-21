@@ -72,8 +72,8 @@ export interface ContactActionOptions {
   /** The company's logo, at the top of every email. */
   logo?: () => Promise<EmailLogo>;
   /**
-   * The brand's design for its emails (email-web-library's `EmailDesign`: colors, type, rules, header, button,
-   * signature), so they look like its website; plain black on white by default.
+   * What makes the emails the brand's (email-web-library's `EmailDesign`: its logo's size, its color, its fonts, its
+   * signature), in the one layout every mail app shows alike; black by default.
    */
   design?: EmailDesign;
   /** Each language's name in the email, by code; English names of common languages by default. */
