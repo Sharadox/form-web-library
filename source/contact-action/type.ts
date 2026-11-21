@@ -6,7 +6,10 @@ export interface ContactState {
   status: "idle" | "sent" | "invalid" | "rate-limited" | "failed";
 }
 
-/** The words the email uses around the visitor's answers, so the inbox can read it in its own language. */
+/** Words the email shows in one language, or in each language by code (`{ en: "Home", pt: "Casa" }`). */
+export type ContactText = string | Readonly<Record<string, string>>;
+
+/** The words the email uses around the visitor's answers, in one language. */
 export interface ContactLabels {
   name: string;
   email: string;
@@ -14,7 +17,7 @@ export interface ContactLabels {
   company: string;
   needs: string;
   language: string;
-  /** The small capitals above the visitor's name: "Contact". */
+  /** The form's name: in the subject ("Contact · Ana") and in small capitals above the visitor's name. */
   contact: string;
   /** Above the visitor's message: "Message". */
   message: string;
@@ -55,10 +58,12 @@ export interface ContactActionOptions {
   /** Where messages go, for example "contact@sharadox.com". */
   to: string;
   /**
-   * The company, for example "Sharadox". Its emails come from "<company> Web Application", with the subject
-   * "<company> Web Application · Contact · Name (Company)", and carry its name beside the logo.
+   * The company, for example "Sharadox". Its emails come from it by name (unless `senderName` says otherwise), and
+   * carry its name beside the logo. The subject is the form's name and the visitor's: "Contact · Name (Company)".
    */
   company: string;
+  /** The name emails come from; the company's by default. */
+  senderName?: string;
   /** The sender address (an address the email server may send from); `EMAIL_SENDER_ADDRESS` or the server user. */
   senderAddress?: string;
   /** The company's logo, at the top of every email. */
@@ -75,8 +80,8 @@ export interface ContactActionOptions {
    * comes from the same sender, and replying to it reaches `to`. None by default.
    */
   acknowledgement?: Readonly<Record<string, ContactAcknowledgement>>;
-  /** Choices the form may send, and how each is named in the email; none by default. */
-  choices?: Readonly<Record<string, string>>;
+  /** Choices the form may send, and how each is named in the email (in each language, or one); none by default. */
+  choices?: Readonly<Record<string, ContactText>>;
   /**
    * The site's domain, for example "sharadox.com". The page the form was sent from (the "page" field) is shown only
    * when it is on this domain or one of its subdomains.
@@ -90,10 +95,16 @@ export interface ContactActionOptions {
   minimumMessageLength?: number;
   /** True requires at least one choice; false by default. */
   requireChoice?: boolean;
-  /** Extra single-line fields the form sends, and how each is named in the email, for example `{ place: "Home" }`. */
-  fields?: Readonly<Record<string, string>>;
-  /** The email's words, in English by default. */
-  labels?: Partial<ContactLabels>;
+  /**
+   * Extra single-line fields the form sends, and how each is named in the email (in each language, or one), for
+   * example `{ place: { en: "Home", pt: "Casa" } }`.
+   */
+  fields?: Readonly<Record<string, ContactText>>;
+  /**
+   * The email's words in each language, by code, over the built-in English and Portuguese ones. The email the company
+   * gets is in the language the visitor used the form in (English when it has no words for it).
+   */
+  labels?: Readonly<Record<string, Partial<ContactLabels>>>;
   /** Messages per address per window; 5 per hour by default. */
   rateLimit?: { window: number; maximum: number };
   /**

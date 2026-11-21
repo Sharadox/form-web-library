@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@sharadox/email-web-library':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.5.0
+        version: 0.5.0
       '@sharadox/icon-web-library':
         specifier: ^0.6.0
         version: 0.6.0(react@19.3.1)
       '@sharadox/web-library':
-        specifier: ^0.8.0
-        version: 0.8.0
+        specifier: ^0.9.0
+        version: 0.9.0
     devDependencies:
       '@sharadox/es-lint-configuration-web-library':
         specifier: ^0.1.1
@@ -447,8 +447,8 @@ packages:
   '@rolldown/pluginutils@1.1.0':
     resolution: {integrity: sha512-K+NU2HDCEem4sClgHH4ZZXwdJeNFkJo+hRk479DIwdIviAPN2hFJH1KHHwg8CxHQXvi0M5XY4deTXINfIiSG6w==}
 
-  '@sharadox/email-web-library@0.4.0':
-    resolution: {integrity: sha512-Hcb+UWL6ZCSycNJI5VqOVHNSR/XTigIX68mUU0CItTMjC3/Xw3xLqwqpCtf7LcDyM/U3TwRytLwqOWSlqmkB7A==}
+  '@sharadox/email-web-library@0.5.0':
+    resolution: {integrity: sha512-QgIEGrvhbwOwQzq2xDk++KJx38nUOmjXw+wyFdbvX5FmKQedycwXumCkPJPVX02hFNr5hWpxz59AmgkxY51QmA==}
     engines: {node: '>=26'}
 
   '@sharadox/es-lint-configuration-web-library@0.1.1':
@@ -502,12 +502,12 @@ packages:
       '@vitest/coverage-v8': '>=5'
       vitest: '>=5'
 
-  '@sharadox/web-library@0.7.0':
-    resolution: {integrity: sha512-7UWzK5z2iKtw1l4wFJiB2Z77qCNFWpYd24+7MWFLvHkrDqIvv6y6+VDjqvbWlrMzRD8D46RdhRPMT5b50Of0lA==}
-    engines: {node: '>=26'}
-
   '@sharadox/web-library@0.8.0':
     resolution: {integrity: sha512-5lqIUC05HtOmaUlnmZtxHCWyWcbziZqNfI761eCHYv1vZmcZifgATBSBaqgkk77zSHvoapLenQJrFocKWdTOtA==}
+    engines: {node: '>=26'}
+
+  '@sharadox/web-library@0.9.0':
+    resolution: {integrity: sha512-Da45H5O6aQxPfKt+EWHUYElXqwtg6IHUPRA7iDmKYn7Iat92/2tLhrXmZOYWj8L7xqKkeahkaYlZp3Izd4tgEQ==}
     engines: {node: '>=26'}
 
   '@shikijs/engine-oniguruma@3.23.0':
@@ -1875,9 +1875,9 @@ snapshots:
 
   '@rolldown/pluginutils@1.1.0': {}
 
-  '@sharadox/email-web-library@0.4.0':
+  '@sharadox/email-web-library@0.5.0':
     dependencies:
-      '@sharadox/web-library': 0.7.0
+      '@sharadox/web-library': 0.8.0
       nodemailer: 10.5.0
 
   '@sharadox/es-lint-configuration-web-library@0.1.1(eslint@9.39.5)(typescript@6.0.3)':
@@ -1921,9 +1921,9 @@ snapshots:
       - oxc-transform-react
       - vite
 
-  '@sharadox/web-library@0.7.0': {}
-
   '@sharadox/web-library@0.8.0': {}
+
+  '@sharadox/web-library@0.9.0': {}
 
   '@shikijs/engine-oniguruma@3.23.0':
     dependencies:

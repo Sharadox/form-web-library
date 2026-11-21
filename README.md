@@ -44,7 +44,7 @@ pnpm add @sharadox/form-web-library
 // the site's library
 export const sendContact = createContactAction({
   to: "contact@example.com",
-  company: "Example", // from "Example Web Application", subject "Example Web Application · Contact · Ana (Café)"
+  company: "Example", // from "Example", subject "Contact · Ana (Café)" ("Contacto · …" when the visitor used Portuguese)
   site: "example.com",
   choices: { website: "Website", logo: "Logo", other: "Others" },
   logo: async () => ({ content: await readFile(LOGO), contentType: "image/png", filename: "logo.png" }),
