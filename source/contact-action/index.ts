@@ -53,12 +53,11 @@ export function textIn(text: ContactText, locale: string): string {
   return text[locale] ?? text.en ?? Object.values(text)[0]!;
 }
 
-/** Black, with the logo (when the site gives one) and the company's name, when the site gives no design of its own. */
+/** The logo (when the site gives one) and the company's name beside it, when the site gives no design of its own. */
 export const plainDesign = (company: string): EmailDesign => ({
   name: company,
   logo: { width: 44, height: 44 },
   wordmark: true,
-  color: "#000000",
 });
 
 /** Common languages' names, when the site gives none. */
@@ -109,6 +108,7 @@ export function createContactAction({
   senderName = company,
   senderAddress,
   logo,
+  darkLogo,
   design: givenDesign,
   languageNames = LANGUAGE_NAMES,
   acknowledgement,
@@ -183,7 +183,12 @@ export function createContactAction({
     ].join("\n");
     try {
       const image = logo ? await logo() : undefined;
-      const inlineImages: InlineImage[] = image ? [{ id: "logo", ...image }] : [];
+      const darkImage = image && darkLogo ? await darkLogo() : undefined;
+      const inlineImages: InlineImage[] = [
+        ...(image ? [{ id: "logo", ...image }] : []),
+        ...(darkImage ? [{ id: "logo-dark", ...darkImage }] : []),
+      ];
+      const logos = { light: Boolean(image), dark: Boolean(darkImage) };
       const configuration = readConfiguration();
       const sender = createSender(configuration);
       const from = {
@@ -209,7 +214,7 @@ export function createContactAction({
             footer,
           },
           design,
-          Boolean(image),
+          logos,
         ),
         inlineImages,
       });
@@ -252,7 +257,7 @@ export function createContactAction({
                     }),
               },
               design,
-              Boolean(image),
+              logos,
             ),
             inlineImages,
           });

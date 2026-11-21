@@ -48,13 +48,14 @@ export const sendContact = createContactAction({
   site: "example.com",
   choices: { website: "Website", logo: "Logo", other: "Others" },
   logo: async () => ({ content: await readFile(LOGO), contentType: "image/png", filename: "logo.png" }),
-  design: EXAMPLE_EMAIL, // the brand's EmailDesign (email-web-library): logo size, color, fonts, signature
+  darkLogo: async () => ({ content: await readFile(LOGO_DARK), contentType: "image/png", filename: "logo-dark.png" }), // white, for dark themes
+  design: EXAMPLE_EMAIL, // the company's EmailDesign (email-web-library): name, logo size, wordmark, signature
   acknowledgement: contactAcknowledgement("https://example.com"), // the automatic reply every site sends
 });
 ```
 
-Every email has the same layout, black on white so every mail app shows it alike: the company's logo at the top
-left, the visitor's name (and company) in the brand's color,, every detail they gave, their message, and at the bottom the page the form was sent from, the
+Every email has the same layout, so every mail app shows it alike: no background, the text, logo and button in the
+theme's foreground (black, or white in dark mode), the company's logo at the top left, the visitor's name (and company),, every detail they gave, their message, and at the bottom the page the form was sent from, the
 language, the time and the IP address. Replying answers the visitor. With `acknowledgement`, a visitor who left an
 email also gets an automatic reply in their language, with their message, and replying to it reaches the company.
 `contactAcknowledgement(site)` (`…/contact-acknowledgement`) gives every site's reply the same words, in English and

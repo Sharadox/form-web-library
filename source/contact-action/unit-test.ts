@@ -26,6 +26,11 @@ const valid = {
 };
 const now = () => new Date("2026-11-17T21:30:00Z");
 const logo = async () => ({ content: new Uint8Array([1, 2, 3]), contentType: "image/png", filename: "logo.png" });
+const darkLogo = async () => ({
+  content: new Uint8Array([4, 5, 6]),
+  contentType: "image/png",
+  filename: "logo-dark.png",
+});
 const acknowledgement = {
   en: {
     subject: "We received your message",
@@ -63,7 +68,9 @@ beforeEach(() => {
 describe("createContactAction", () => {
   test("emails the company by its name, the visitor as reply-to, every detail in the form's language", async () => {
     vi.stubEnv("EMAIL_SENDER_ADDRESS", "contact@web.sharadox.com");
-    expect(await create({ logo })(form({ ...valid, need: ["other", "logo"] }), "1.2.3.4")).toEqual({ status: "sent" });
+    expect(await create({ logo, darkLogo })(form({ ...valid, need: ["other", "logo"] }), "1.2.3.4")).toEqual({
+      status: "sent",
+    });
     const message = send.mock.calls[0]![0];
     expect(message.from).toEqual({ name: "Sharadox", address: "contact@web.sharadox.com" });
     expect(message.to).toBe("contact@sharadox.com");
@@ -80,8 +87,10 @@ describe("createContactAction", () => {
     expect(message.html).toContain('href="https://development.sharadox.com/pt#contact"');
     expect(message.html).toContain(">Responder a Ana</a>");
     expect(message.html).toContain('lang="pt"');
+    expect(message.html).toContain('<img src="cid:logo-dark"');
     expect(message.inlineImages).toEqual([
       { id: "logo", content: new Uint8Array([1, 2, 3]), contentType: "image/png", filename: "logo.png" },
+      { id: "logo-dark", content: new Uint8Array([4, 5, 6]), contentType: "image/png", filename: "logo-dark.png" },
     ]);
     // No acknowledgement given: no automatic reply.
     expect(send).toHaveBeenCalledTimes(1);
@@ -221,7 +230,8 @@ describe("createContactAction", () => {
       labels: { pt: { needs: "Criações" }, en: { contact: "Booking" } },
       languageNames: { pt: "Português" },
       senderName: "Sharadox Studio",
-      design: { ...plainDesign("Sharadox"), color: "#c79a43" },
+      design: plainDesign("Sharadox"),
+      darkLogo, // without the black logo, the white one isn't carried either
     });
     const phoneOnly = { name: "Rui", phone: "+351 912 345 678", place: "Vilamoura", "started-at": "1", locale: "pt" };
     expect(await action(form({ ...phoneOnly, need: "logo" }), "6.6.6.6")).toEqual({ status: "sent" });
@@ -234,11 +244,12 @@ describe("createContactAction", () => {
         "Formulário: sharadox.com\nIdioma: Português\nEnviado: 2026-11-17 21:30 UTC\nIP: 6.6.6.6",
     );
     expect(message.html).toContain('href="tel:+351912345678"');
-    expect(message.html).toContain("background-color:#c79a43");
+    expect(message.html).toContain('class="button"');
     // Only a phone: the button calls them.
     expect(message.html).toContain('href="tel:+351912345678" style="display:inline-block');
     expect(message.html).toContain(">Ligar a Rui</a>");
     expect(message.html).not.toContain("cid:logo");
+    expect(message.inlineImages).toEqual([]);
     await action(form({ ...phoneOnly, place: "" }), "7.7.7.7");
     expect(send.mock.calls[1]![0].text).not.toContain("Casa:");
     // In English: the English words, and the site's own name for the form.
@@ -288,7 +299,7 @@ test("the automatic reply carries the site's button, and the company's signature
   const reply = (send.mock.calls[1] as unknown as [{ html: string }])[0].html;
   expect(reply).toContain(">Visit sharadox.com</a>");
   expect(reply).toContain(
-    '<a href="https://sharadox.com" style="color:#71717a;text-decoration:underline">sharadox.com</a>',
+    '<a class="quiet" href="https://sharadox.com" style="color:#71717a;text-decoration:underline">sharadox.com</a>',
   );
   expect(reply).not.toContain("Sharadox: <a");
 });

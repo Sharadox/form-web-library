@@ -69,11 +69,13 @@ export interface ContactActionOptions {
   senderName?: string;
   /** The sender address (an address the email server may send from); `EMAIL_SENDER_ADDRESS` or the server user. */
   senderAddress?: string;
-  /** The company's logo, at the top of every email. */
+  /** The company's logo at the top of every email, in black, with a thin white outline for darkened mail apps. */
   logo?: () => Promise<EmailLogo>;
+  /** The same logo in white, shown instead where the mail app is in a dark theme (with `logo` only). */
+  darkLogo?: () => Promise<EmailLogo>;
   /**
-   * What makes the emails the brand's (email-web-library's `EmailDesign`: its logo's size, its color, its fonts, its
-   * signature), in the one layout every mail app shows alike; black by default.
+   * What makes the emails the company's (email-web-library's `EmailDesign`: its name, its logo's size, whether the
+   * name sits beside the logo, its signature), in the one layout every mail app shows alike.
    */
   design?: EmailDesign;
   /** Each language's name in the email, by code; English names of common languages by default. */

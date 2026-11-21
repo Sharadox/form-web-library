@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@sharadox/email-web-library':
-        specifier: 0.6.0-polish.24
-        version: 0.6.0-polish.24
+        specifier: 0.6.0-polish.25
+        version: 0.6.0-polish.25
       '@sharadox/icon-web-library':
         specifier: ^0.6.0
         version: 0.6.0(react@19.3.1)
@@ -447,8 +447,8 @@ packages:
   '@rolldown/pluginutils@1.1.0':
     resolution: {integrity: sha512-K+NU2HDCEem4sClgHH4ZZXwdJeNFkJo+hRk479DIwdIviAPN2hFJH1KHHwg8CxHQXvi0M5XY4deTXINfIiSG6w==}
 
-  '@sharadox/email-web-library@0.6.0-polish.24':
-    resolution: {integrity: sha512-OqGici3wRoGgNOq/XAcStHdWpARfdOytwN8BDrBfhqCh4Ml4P3gogQ7YkkPUCJXI95g0LRgZPEBanrAMLxq6+Q==}
+  '@sharadox/email-web-library@0.6.0-polish.25':
+    resolution: {integrity: sha512-g6jBMsZU+oFc4QgnlC7sEHxWAGIX0aAJu+MGF/0YxKR8Lm1NFjOICUYTWdENfZC0c3A/MigvFgOmTfW2De1gpA==}
     engines: {node: '>=26'}
 
   '@sharadox/es-lint-configuration-web-library@0.1.1':
@@ -1875,7 +1875,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.1.0': {}
 
-  '@sharadox/email-web-library@0.6.0-polish.24':
+  '@sharadox/email-web-library@0.6.0-polish.25':
     dependencies:
       '@sharadox/web-library': 0.8.0
       nodemailer: 10.5.0
