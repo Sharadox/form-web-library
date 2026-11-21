@@ -1,14 +1,18 @@
 import { createEmailSender, EmailError, emailLayout, readEmailServerConfiguration } from "@sharadox/email-web-library";
 import type { EmailDesign, EmailRow, InlineImage } from "@sharadox/email-web-library";
-import { separate } from "@sharadox/web-library/text/separate";
-import { SEPARATOR } from "@sharadox/web-library/text/separator";
+import { separated } from "@sharadox/web-library/text/separated";
 import { createRateLimiter } from "@sharadox/form-web-library/rate-limit";
 import { parseContact } from "@sharadox/form-web-library/parse-contact";
-import type { ContactActionOptions, ContactLabels, ContactState } from "@sharadox/form-web-library/contact-action/type";
+import type {
+  ContactActionOptions,
+  ContactLabels,
+  ContactState,
+  ContactText,
+} from "@sharadox/form-web-library/contact-action/type";
 
 const oneLine = (text: string) => text.replace(/[\r\n]+/g, " ");
 
-/** The email's words when the site gives none. */
+/** The email's words in English. */
 export const ENGLISH_LABELS: ContactLabels = {
   name: "Name",
   email: "Email",
@@ -23,6 +27,31 @@ export const ENGLISH_LABELS: ContactLabels = {
   reply: "Reply to",
   call: "Call",
 };
+
+/** The email's words in Portuguese. */
+export const PORTUGUESE_LABELS: ContactLabels = {
+  name: "Nome",
+  email: "Email",
+  phone: "Telefone",
+  company: "Empresa",
+  needs: "Pedido",
+  language: "Idioma",
+  contact: "Contacto",
+  message: "Mensagem",
+  page: "Formulário",
+  sent: "Enviado",
+  reply: "Responder a",
+  call: "Ligar a",
+};
+
+/** The built-in words, by language. */
+export const CONTACT_LABELS: Readonly<Record<string, ContactLabels>> = { en: ENGLISH_LABELS, pt: PORTUGUESE_LABELS };
+
+/** Words in the given language: the text itself, its translation, the English one, or the first there is. */
+export function textIn(text: ContactText, locale: string): string {
+  if (typeof text === "string") return text;
+  return text[locale] ?? text.en ?? Object.values(text)[0]!;
+}
 
 /** Black on white, plainly, when the site gives no design of its own. */
 export const plainDesign = (company: string): EmailDesign => ({
@@ -83,11 +112,12 @@ export function formPage(value: ReturnType<FormData["get"]>, site: string): stri
  * Builds the work of a contact form's server action: checks for bots (they get a fake success), validates, limits
  * each address and everyone together per day (`dailyMaximum`, so a flood can't run up the email bill), then emails
  * the company in its own design (`design`): its logo at the top, every detail the visitor gave, their message, a
- * button to answer them, and the page, language, time and IP at the bottom. It comes from "<company> Web Application" with the subject
- * "<company> Web Application · Contact · Name (Company)", and replying answers the visitor. When the visitor left an
+ * button to answer them, and the page, language, time and IP at the bottom, all in the language the visitor used the
+ * form in. It comes from the company by name, with the subject "Contact · Name (Company)" ("Contacto · …" in
+ * Portuguese), and replying answers the visitor. When the visitor left an
  * email and the site gives an `acknowledgement`, they get an automatic reply in their language with their message,
  * which the company can be reached by replying to. Sites can accept a phone instead of an email (`reach`), make the
- * message optional, add fields and write the email in their own language (`labels`).
+ * message optional, add fields and give the email's words in more languages (`labels`).
  *
  * @example
  * const sendContact = createContactAction({ to: "contact@sharadox.com", company: "Sharadox", site: "sharadox.com" });
@@ -97,6 +127,7 @@ export function formPage(value: ReturnType<FormData["get"]>, site: string): stri
 export function createContactAction({
   to,
   company,
+  senderName = company,
   senderAddress,
   logo,
   design: givenDesign,
@@ -119,8 +150,6 @@ export function createContactAction({
 }: ContactActionOptions): (form: FormData, ip: string) => Promise<ContactState> {
   const allow = createRateLimiter(rateLimit);
   const allowToday = createRateLimiter({ window: 24 * 60 * 60 * 1000, maximum: dailyMaximum });
-  const labels = { ...ENGLISH_LABELS, ...givenLabels };
-  const senderName = `${company} Web Application`;
   const design = givenDesign ?? plainDesign(company);
   return async (form, ip) => {
     const parsed = parseContact(form, {
@@ -136,10 +165,13 @@ export function createContactAction({
     // Each address first, so one address can't use up everyone's daily emails.
     if (!allow(ip) || !allowToday("everyone")) return { status: "rate-limited" };
     const message = parsed.value;
+    // The company reads the email in the language the visitor used the form in.
+    const locale = message.locale;
+    const labels = { ...(CONTACT_LABELS[locale] ?? ENGLISH_LABELS), ...givenLabels[locale] };
     const page = formPage(form.get("page"), site);
     const language = languageNames[message.locale] ?? message.locale;
     const sent = `${now().toISOString().slice(0, 16).replace("T", " ")} UTC`;
-    const named = message.choices.map((choice) => choices[choice]!);
+    const named = message.choices.map((choice) => textIn(choices[choice]!, locale));
     const who = message.company ? `${message.name} (${message.company})` : message.name;
     const firstName = message.name.split(/\s+/)[0]!;
     // The one thing to do: answer by email, or call when only a phone was left.
@@ -155,7 +187,7 @@ export function createContactAction({
       ...(message.company ? [{ label: labels.company, value: message.company }] : []),
       ...Object.entries(fields)
         .filter(([field]) => message.fields[field])
-        .map(([field, label]) => ({ label, value: message.fields[field]! })),
+        .map(([field, label]) => ({ label: textIn(label, locale), value: message.fields[field]! })),
       ...(named.length ? [{ label: labels.needs, value: named.join(", ") }] : []),
     ];
     const footer: EmailRow[] = [
@@ -184,12 +216,12 @@ export function createContactAction({
         to,
         // Replying to the email answers the visitor at the address they typed.
         ...(message.email ? { replyTo: { name: oneLine(message.name), address: message.email } } : {}),
-        subject: oneLine(separate(SEPARATOR, senderName, labels.contact, who)).slice(0, 300),
+        subject: oneLine(separated(labels.contact, who)).slice(0, 300),
         text,
         html: emailLayout(
           {
-            language: "en",
-            preview: separate(SEPARATOR, who, named.join(", ")),
+            language: locale,
+            preview: separated(who, named.join(", ")),
             eyebrow: labels.contact,
             heading: who,
             rows,

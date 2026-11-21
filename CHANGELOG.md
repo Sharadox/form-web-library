@@ -2,6 +2,12 @@
 
 What changed in each version of `@sharadox/form-web-library`, newest first.
 
+## 0.8.0
+
+- The company's email comes from the company by name (or `senderName`), no longer "<company> Web Application".
+- Its subject is the form's name and the visitor's: "Contact · Ana (Café)".
+- It is in the language the visitor used the form in: built-in English and Portuguese words (`CONTACT_LABELS`), `labels` by language, and choices and fields named in each language.
+
 ## 0.6.1
 
 Llms.txt summary names the phone field
