@@ -63,12 +63,12 @@
   },
   "homepage": "https://github.com/Sharadox/form-web-library#readme",
   "devDependencies": {
-    "@sharadox/es-lint-configuration-web-library": "^0.1.1",
-    "@sharadox/library-build-web-library": "^0.1.2",
-    "@sharadox/prettier-configuration-web-library": "^0.1.0",
-    "@sharadox/turborepo-configuration-web-library": "0.1.3-polish.13",
-    "@sharadox/type-script-configuration-web-library": "^0.2.0",
-    "@sharadox/vitest-configuration-web-library": "^0.1.2",
+    "@sharadox/es-lint-configuration-web-library": "^0.1.2",
+    "@sharadox/library-build-web-library": "^0.2.0",
+    "@sharadox/prettier-configuration-web-library": "^0.1.1",
+    "@sharadox/turborepo-configuration-web-library": "0.1.3",
+    "@sharadox/type-script-configuration-web-library": "^0.2.2",
+    "@sharadox/vitest-configuration-web-library": "^0.2.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^24.19.2",
@@ -88,9 +88,9 @@
     "vitest": "^5.1.0"
   },
   "dependencies": {
-    "@sharadox/email-web-library": "0.6.0-polish.26",
-    "@sharadox/icon-web-library": "^0.6.0",
-    "@sharadox/web-library": "0.10.0-polish.23"
+    "@sharadox/email-web-library": "0.6.0",
+    "@sharadox/icon-web-library": "^0.6.1",
+    "@sharadox/web-library": "0.10.0"
   },
   "peerDependencies": {
     "react": ">=19"
