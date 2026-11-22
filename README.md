@@ -43,25 +43,25 @@ pnpm add @sharadox/form-web-library
 ```ts
 // the site's library
 export const sendContact = createContactAction({
-  to: "contact@example.com",
-  company: "Example", // from "Example", subject "Contact · Ana (Café)" ("Contacto · …" when the visitor used Portuguese)
-  site: "example.com",
+  to: "contact@example.com", // the email goes here and to the visitor; replies come here
+  company: "Example", // from "Example", signed "Best regards, Example."
   choices: { website: "Website", logo: "Logo", other: "Others" },
   logo: async () => ({ content: await readFile(LOGO), contentType: "image/png", filename: "logo.png" }),
   darkLogo: async () => ({ content: await readFile(LOGO_DARK), contentType: "image/png", filename: "logo-dark.png" }), // white, for dark themes
   design: EXAMPLE_EMAIL, // the company's EmailDesign (email-web-library): name, logo size, wordmark, signature
-  acknowledgement: contactAcknowledgement("https://example.com"), // the automatic reply every site sends
 });
 ```
 
-Every email has the same layout, so every mail app shows it alike: no background, the text, logo and button in the
-theme's foreground (black, or white in dark mode), the company's logo at the top left, the visitor's name (and company),, every detail they gave, their message, and at the bottom the page the form was sent from, the
-language, the time and the IP address. Replying answers the visitor. With `acknowledgement`, a visitor who left an
-email also gets an automatic reply in their language, with their message, and replying to it reaches the company.
-`contactAcknowledgement(site)` (`…/contact-acknowledgement`) gives every site's reply the same words, in English and
-Portuguese: "Contact · We received your message" ("Contacto · Recebemos a sua mensagem"), thanks by name, a reply
-within one working day, the message back and a button to the site.
-The emails are laid out by email-web-library's `emailLayout` in the brand's `design` (its `EmailDesign`), which a site also uses for any other email it sends.
+The form sends one email, to both the visitor and the company, so they share one conversation. It comes from the
+company by name, from the sending address (`EMAIL_SENDER_ADDRESS`), with replies set to go to the company: replying,
+the visitor reaches the company, and replying to all, the company reaches the visitor (the sending address never
+appears). The subject is "Contact · Ana (Café) · <conversation identifier>", a UUID version 7. The email thanks the
+visitor by name, says the company will answer within a working day and that replying adds to the conversation, lists
+every detail they gave (name, organization, email, phone, the site's fields, their needs one per line, their message
+keeping its lines) and the conversation's identifier, and signs off with the company's name, all in the language the
+visitor used the form in (English and Portuguese built in, `labels` for more). A visitor who left only a phone isn't
+sent anything; the company still is. The email is laid out by email-web-library's `emailLayout`, which a site also
+uses for any other email it sends.
 
 ```ts
 // the application's server action
@@ -83,17 +83,17 @@ The email server comes from `EMAIL_SERVER_*` and `EMAIL_SENDER_ADDRESS`.
 
 ## API
 
-| Import              | Export                                                                                                                                                                                                                                                                           |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `…/contact-problem` | `contactProblems({ name, email, phone })`: what a form's contact details still lack                                                                                                                                                                                              |
-| `…/choice-request`  | `requestChoices(event, choices)`, `useChoiceRequests(event, onRequest)`: a button elsewhere asks the form to tick choices                                                                                                                                                        |
-| `…/bot-field`       | `<BotFields />`: the honeypot and fill-time fields `isLikelyBot` reads                                                                                                                                                                                                           |
-| `…/contact-action`  | `createContactAction(options)` → `(form, ip) => Promise<ContactState>`; `ENGLISH_LABELS`, `PLAIN_THEME`, `LANGUAGE_NAMES`, `formPage(value, site)`; `ContactState`, `ContactActionOptions`, `ContactLabels`, `ContactAcknowledgement` and `EmailLogo` in `…/contact-action/type` |
-| `…/parse-contact`   | `parseContact(form, { choices?, choiceField?, reach?, requireMessage?, minimumMessageLength?, requireChoice?, fields?, now? })` → `bot`, `invalid` or `valid`                                                                                                                    |
-| `…/contact-check`   | `isEmail(text)`, `isPhone(text)`: the rules the action uses, safe in the browser for checks before sending                                                                                                                                                                       |
-| `…/bot-check`       | `isLikelyBot(form, { honeypotField?, startedAtField?, minimumFillTime?, now? })`                                                                                                                                                                                                 |
-| `…/rate-limit`      | `createRateLimiter({ window, maximum })` → `(key, now?) => boolean` (kept in memory, per server instance)                                                                                                                                                                        |
-| `…/field`           | `readField(form, name, maximumLength)`                                                                                                                                                                                                                                           |
+| Import              | Export                                                                                                                                                                                                                                                                                             |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `…/contact-problem` | `contactProblems({ name, email, phone })`: what a form's contact details still lack                                                                                                                                                                                                                |
+| `…/choice-request`  | `requestChoices(event, choices)`, `useChoiceRequests(event, onRequest)`: a button elsewhere asks the form to tick choices                                                                                                                                                                          |
+| `…/bot-field`       | `<BotFields />`: the honeypot and fill-time fields `isLikelyBot` reads                                                                                                                                                                                                                             |
+| `…/contact-action`  | `createContactAction(options)` → `(form, ip) => Promise<ContactState>`; `ENGLISH_LABELS`, `PORTUGUESE_LABELS`, `CONTACT_LABELS`, `plainDesign(company)`, `textIn(text, locale)`; `ContactState`, `ContactActionOptions`, `ContactLabels`, `ContactText` and `EmailLogo` in `…/contact-action/type` |
+| `…/parse-contact`   | `parseContact(form, { choices?, choiceField?, reach?, requireMessage?, minimumMessageLength?, requireChoice?, fields?, now? })` → `bot`, `invalid` or `valid`                                                                                                                                      |
+| `…/contact-check`   | `isEmail(text)`, `isPhone(text)`: the rules the action uses, safe in the browser for checks before sending                                                                                                                                                                                         |
+| `…/bot-check`       | `isLikelyBot(form, { honeypotField?, startedAtField?, minimumFillTime?, now? })`                                                                                                                                                                                                                   |
+| `…/rate-limit`      | `createRateLimiter({ window, maximum })` → `(key, now?) => boolean` (kept in memory, per server instance)                                                                                                                                                                                          |
+| `…/field`           | `readField(form, name, maximumLength)`                                                                                                                                                                                                                                                             |
 
 ## Develop
 

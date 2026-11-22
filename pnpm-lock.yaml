@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@sharadox/email-web-library':
-        specifier: 0.6.0-polish.25
-        version: 0.6.0-polish.25
+        specifier: 0.6.0-polish.26
+        version: 0.6.0-polish.26
       '@sharadox/icon-web-library':
         specifier: ^0.6.0
         version: 0.6.0(react@19.3.1)
       '@sharadox/web-library':
-        specifier: ^0.9.0
-        version: 0.9.0
+        specifier: 0.10.0-polish.23
+        version: 0.10.0-polish.23
     devDependencies:
       '@sharadox/es-lint-configuration-web-library':
         specifier: ^0.1.1
@@ -28,8 +28,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@sharadox/turborepo-configuration-web-library':
-        specifier: ^0.1.0
-        version: 0.1.0(turbo@2.11.10)
+        specifier: 0.1.3-polish.13
+        version: 0.1.3-polish.13(turbo@2.11.10)
       '@sharadox/type-script-configuration-web-library':
         specifier: ^0.2.0
         version: 0.2.0(typescript@6.0.3)
@@ -447,8 +447,8 @@ packages:
   '@rolldown/pluginutils@1.1.0':
     resolution: {integrity: sha512-K+NU2HDCEem4sClgHH4ZZXwdJeNFkJo+hRk479DIwdIviAPN2hFJH1KHHwg8CxHQXvi0M5XY4deTXINfIiSG6w==}
 
-  '@sharadox/email-web-library@0.6.0-polish.25':
-    resolution: {integrity: sha512-g6jBMsZU+oFc4QgnlC7sEHxWAGIX0aAJu+MGF/0YxKR8Lm1NFjOICUYTWdENfZC0c3A/MigvFgOmTfW2De1gpA==}
+  '@sharadox/email-web-library@0.6.0-polish.26':
+    resolution: {integrity: sha512-Qmu8EfSVgz/ypsLkbVP3ldmmF7WpBmkXyDemeoPpg0jm428wTYFcF/3N597vMX20vkewoFQ5OO241yV9rlPgjg==}
     engines: {node: '>=26'}
 
   '@sharadox/es-lint-configuration-web-library@0.1.1':
@@ -482,9 +482,9 @@ packages:
     resolution: {integrity: sha512-OOuZzYYcjZSC7wtj3R+dFLdwholBpSPWXG+fhl3UQZdsUvp7M8kyGRFtJTGXc7VB9BGFEE95ZTkuo4R93/SLHg==}
     engines: {node: '>=24'}
 
-  '@sharadox/turborepo-configuration-web-library@0.1.0':
-    resolution: {integrity: sha512-7vRccpzTWe/irYpkWhWcRkBigB2L0GiIA7Zt0faPsZk02Bpy+ipzCeMfXfqyAkQ9yt/EKGGy+OY2IPZbeiG1lw==}
-    engines: {node: '>=24'}
+  '@sharadox/turborepo-configuration-web-library@0.1.3-polish.13':
+    resolution: {integrity: sha512-FM+4esw5j+uOGlJRTrDb4V9v6vx1XhHMi1zoLUpNL/rSJzjlx9ihFvFFVlLt8+JuIGIN4gbhsYfuVO64FzwzBw==}
+    engines: {node: '>=26'}
     hasBin: true
     peerDependencies:
       turbo: '>=2'
@@ -502,12 +502,12 @@ packages:
       '@vitest/coverage-v8': '>=5'
       vitest: '>=5'
 
-  '@sharadox/web-library@0.8.0':
-    resolution: {integrity: sha512-5lqIUC05HtOmaUlnmZtxHCWyWcbziZqNfI761eCHYv1vZmcZifgATBSBaqgkk77zSHvoapLenQJrFocKWdTOtA==}
+  '@sharadox/web-library@0.10.0-polish.23':
+    resolution: {integrity: sha512-JDZ0hf6WZrM06jZslB50yjzwKu6fdxuTXkWHY/ILe7AqFwhZ12T6GvgSPdoNYlOMd+80coAf98PhQpvFGPPN+Q==}
     engines: {node: '>=26'}
 
-  '@sharadox/web-library@0.9.0':
-    resolution: {integrity: sha512-Da45H5O6aQxPfKt+EWHUYElXqwtg6IHUPRA7iDmKYn7Iat92/2tLhrXmZOYWj8L7xqKkeahkaYlZp3Izd4tgEQ==}
+  '@sharadox/web-library@0.8.0':
+    resolution: {integrity: sha512-5lqIUC05HtOmaUlnmZtxHCWyWcbziZqNfI761eCHYv1vZmcZifgATBSBaqgkk77zSHvoapLenQJrFocKWdTOtA==}
     engines: {node: '>=26'}
 
   '@shikijs/engine-oniguruma@3.23.0':
@@ -1875,7 +1875,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.1.0': {}
 
-  '@sharadox/email-web-library@0.6.0-polish.25':
+  '@sharadox/email-web-library@0.6.0-polish.26':
     dependencies:
       '@sharadox/web-library': 0.8.0
       nodemailer: 10.5.0
@@ -1902,7 +1902,7 @@ snapshots:
 
   '@sharadox/prettier-configuration-web-library@0.1.0': {}
 
-  '@sharadox/turborepo-configuration-web-library@0.1.0(turbo@2.11.10)':
+  '@sharadox/turborepo-configuration-web-library@0.1.3-polish.13(turbo@2.11.10)':
     dependencies:
       turbo: 2.11.10
 
@@ -1921,9 +1921,9 @@ snapshots:
       - oxc-transform-react
       - vite
 
-  '@sharadox/web-library@0.8.0': {}
+  '@sharadox/web-library@0.10.0-polish.23': {}
 
-  '@sharadox/web-library@0.9.0': {}
+  '@sharadox/web-library@0.8.0': {}
 
   '@shikijs/engine-oniguruma@3.23.0':
     dependencies:

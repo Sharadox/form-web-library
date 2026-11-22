@@ -1,5 +1,6 @@
 import { createEmailSender, EmailError, emailLayout, readEmailServerConfiguration } from "@sharadox/email-web-library";
 import type { EmailDesign, EmailRow, InlineImage } from "@sharadox/email-web-library";
+import { uuidVersion7 } from "@sharadox/web-library/identifier/uuid-version-7";
 import { separated } from "@sharadox/web-library/text/separated";
 import { createRateLimiter } from "@sharadox/form-web-library/rate-limit";
 import { parseContact } from "@sharadox/form-web-library/parse-contact";
@@ -14,34 +15,38 @@ const oneLine = (text: string) => text.replace(/[\r\n]+/g, " ");
 
 /** The email's words in English. */
 export const ENGLISH_LABELS: ContactLabels = {
+  contact: "Contact",
+  thanks: "Thank you",
+  paragraphs: [
+    "Your message has reached us and we will get back to you as soon as possible, usually within a working day.",
+    "Feel free to reply to this email, in case you would like to add anything else to the conversation.",
+  ],
   name: "Name",
+  organization: "Organization",
   email: "Email",
   phone: "Phone",
-  company: "Company",
   needs: "Needs",
-  language: "Language",
-  contact: "Contact",
   message: "Message",
-  page: "Form",
-  sent: "Sent",
-  reply: "Reply to",
-  call: "Call",
+  conversation: "Conversation identifier",
+  closing: "Best regards,",
 };
 
 /** The email's words in Portuguese. */
 export const PORTUGUESE_LABELS: ContactLabels = {
+  contact: "Contacto",
+  thanks: "Obrigado",
+  paragraphs: [
+    "A sua mensagem chegou até nós e responderemos o mais brevemente possível, normalmente dentro de um dia útil.",
+    "Caso queira acrescentar algo à conversa, basta responder a este email.",
+  ],
   name: "Nome",
+  organization: "Organização",
   email: "Email",
   phone: "Telefone",
-  company: "Empresa",
-  needs: "Pedido",
-  language: "Idioma",
-  contact: "Contacto",
+  needs: "Necessidades",
   message: "Mensagem",
-  page: "Formulário",
-  sent: "Enviado",
-  reply: "Responder a",
-  call: "Ligar a",
+  conversation: "Identificador da conversa",
+  closing: "Cumprimentos,",
 };
 
 /** The built-in words, by language. */
@@ -60,45 +65,20 @@ export const plainDesign = (company: string): EmailDesign => ({
   wordmark: true,
 });
 
-/** Common languages' names, when the site gives none. */
-export const LANGUAGE_NAMES: Readonly<Record<string, string>> = {
-  en: "English",
-  pt: "Português",
-  es: "Español",
-  fr: "Français",
-  de: "Deutsch",
-  it: "Italiano",
-};
-
-/**
- * The page the form was sent from, when it is a web address on the site's domain (or a subdomain of it); anything
- * else is left out, so a forged field can't put a link of someone else's in the inbox.
- */
-export function formPage(value: ReturnType<FormData["get"]>, site: string): string | undefined {
-  if (typeof value !== "string" || value.length > 500) return undefined;
-  try {
-    const url = new URL(value);
-    const host = url.hostname;
-    return url.protocol === "https:" && (host === site || host.endsWith(`.${site}`)) ? url.href : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 /**
  * Builds the work of a contact form's server action: checks for bots (they get a fake success), validates, limits
- * each address and everyone together per day (`dailyMaximum`, so a flood can't run up the email bill), then emails
- * the company in its own design (`design`): its logo at the top, every detail the visitor gave, their message, a
- * button to answer them, and the page, language, time and IP at the bottom, all in the language the visitor used the
- * form in. It comes from the company by name, with the subject "Contact · Name (Company)" ("Contacto · …" in
- * Portuguese), and replying answers the visitor. When the visitor left an
- * email and the site gives an `acknowledgement`, they get an automatic reply in their language with their message
- * (its subject also starting with the form's name: "Contact · We received your message"),
- * which the company can be reached by replying to. Sites can accept a phone instead of an email (`reach`), make the
+ * each address and everyone together per day (`dailyMaximum`, so a flood can't run up the email bill), then sends one
+ * email to both the visitor and the company (`to`), so they share one conversation: replying, the visitor reaches the
+ * company; replying to all, the company reaches the visitor (the sending address is never in the way: replies go to
+ * `to`). It thanks the visitor by name, says what happens next, lists every detail they gave (their needs one per
+ * line, their message keeping its lines) and the conversation's identifier (a UUID version 7), and signs off with the
+ * company's name, all in the language the visitor used the form in. It comes from the company by name, with the
+ * subject "Contact · Name (Organization) · <identifier>" ("Contacto · …" in Portuguese). A visitor who left only a
+ * phone isn't sent anything; the company still is. Sites can accept a phone instead of an email (`reach`), make the
  * message optional, add fields and give the email's words in more languages (`labels`).
  *
  * @example
- * const sendContact = createContactAction({ to: "contact@sharadox.com", company: "Sharadox", site: "sharadox.com" });
+ * const sendContact = createContactAction({ to: "contact@sharadox.com", company: "Sharadox" });
  * // in a "use server" file:
  * export async function sendContactAction(_: ContactState, form: FormData) { return sendContact(form, ip); }
  */
@@ -110,10 +90,7 @@ export function createContactAction({
   logo,
   darkLogo,
   design: givenDesign,
-  languageNames = LANGUAGE_NAMES,
-  acknowledgement,
   choices = {},
-  site,
   reach = "email",
   requireMessage = true,
   minimumMessageLength = 1,
@@ -125,7 +102,7 @@ export function createContactAction({
   readConfiguration = readEmailServerConfiguration,
   createSender = createEmailSender,
   reportError = (message, error) => console.error(message, error),
-  now = () => new Date(),
+  identifier = () => uuidVersion7(),
 }: ContactActionOptions): (form: FormData, ip: string) => Promise<ContactState> {
   const allow = createRateLimiter(rateLimit);
   const allowToday = createRateLimiter({ window: 24 * 60 * 60 * 1000, maximum: dailyMaximum });
@@ -144,42 +121,40 @@ export function createContactAction({
     // Each address first, so one address can't use up everyone's daily emails.
     if (!allow(ip) || !allowToday("everyone")) return { status: "rate-limited" };
     const message = parsed.value;
-    // The company reads the email in the language the visitor used the form in.
+    // The email is in the language the visitor used the form in.
     const locale = message.locale;
     const labels = { ...(CONTACT_LABELS[locale] ?? ENGLISH_LABELS), ...givenLabels[locale] };
-    const page = formPage(form.get("page"), site);
-    const language = languageNames[message.locale] ?? message.locale;
-    const sent = `${now().toISOString().slice(0, 16).replace("T", " ")} UTC`;
-    const named = message.choices.map((choice) => textIn(choices[choice]!, locale));
+    const conversation = identifier();
+    const needs = message.choices.map((choice) => textIn(choices[choice]!, locale));
     const who = message.company ? `${message.name} (${message.company})` : message.name;
-    const firstName = message.name.split(/\s+/)[0]!;
-    // The one thing to do: answer by email, or call when only a phone was left.
-    const answer = message.email
-      ? { label: `${labels.reply} ${firstName}`, href: `mailto:${message.email}` }
-      : { label: `${labels.call} ${firstName}`, href: `tel:${message.phone.replace(/[^\d+]/g, "")}` };
+    const heading = `${labels.thanks}, ${message.name}.`;
     const rows: EmailRow[] = [
       { label: labels.name, value: message.name },
+      ...(message.company ? [{ label: labels.organization, value: message.company }] : []),
       ...(message.email ? [{ label: labels.email, value: message.email, href: `mailto:${message.email}` }] : []),
       ...(message.phone
         ? [{ label: labels.phone, value: message.phone, href: `tel:${message.phone.replace(/[^\d+]/g, "")}` }]
         : []),
-      ...(message.company ? [{ label: labels.company, value: message.company }] : []),
       ...Object.entries(fields)
         .filter(([field]) => message.fields[field])
         .map(([field, label]) => ({ label: textIn(label, locale), value: message.fields[field]! })),
-      ...(named.length ? [{ label: labels.needs, value: named.join(", ") }] : []),
-    ];
-    const footer: EmailRow[] = [
-      ...(page ? [{ label: labels.page, value: page, href: page }] : [{ label: labels.page, value: site }]),
-      { label: labels.language, value: language },
-      { label: labels.sent, value: sent },
-      { label: "IP", value: ip },
+      ...(needs.length ? [{ label: labels.needs, value: needs }] : []),
+      ...(message.message ? [{ label: labels.message, value: message.message, keepLines: true }] : []),
+      { label: labels.conversation, value: conversation },
     ];
     const text = [
-      ...rows.map((row) => `${row.label}: ${row.value}`),
-      ...(message.message ? ["", `${labels.message}:`, message.message] : []),
+      heading,
       "",
-      ...footer.map((row) => `${row.label}: ${row.value}`),
+      ...labels.paragraphs,
+      "",
+      ...rows.map((row) =>
+        typeof row.value === "string"
+          ? `${row.label}:${row.keepLines ? "\n" : " "}${row.value}`
+          : [`${row.label}:`, ...row.value.map((item) => `- ${item}`)].join("\n"),
+      ),
+      "",
+      labels.closing,
+      `${company}.`,
     ].join("\n");
     try {
       const image = logo ? await logo() : undefined;
@@ -188,83 +163,33 @@ export function createContactAction({
         ...(image ? [{ id: "logo", ...image }] : []),
         ...(darkImage ? [{ id: "logo-dark", ...darkImage }] : []),
       ];
-      const logos = { light: Boolean(image), dark: Boolean(darkImage) };
       const configuration = readConfiguration();
-      const sender = createSender(configuration);
-      const from = {
-        name: senderName,
-        address: senderAddress || process.env.EMAIL_SENDER_ADDRESS || configuration.username,
-      };
-      await sender.send({
-        from,
-        to,
-        // Replying to the email answers the visitor at the address they typed.
-        ...(message.email ? { replyTo: { name: oneLine(message.name), address: message.email } } : {}),
-        subject: oneLine(separated(labels.contact, who)).slice(0, 300),
+      await createSender(configuration).send({
+        from: {
+          name: senderName,
+          address: senderAddress || process.env.EMAIL_SENDER_ADDRESS || configuration.username,
+        },
+        // One email to both: the visitor (when they left an email) and the company, in one conversation.
+        to: [...(message.email ? [{ name: oneLine(message.name), address: message.email }] : []), to],
+        // Replies go to the company, never to the sending address; replying to all, the company reaches the visitor.
+        replyTo: to,
+        subject: oneLine(separated(labels.contact, who, conversation)).slice(0, 300),
         text,
         html: emailLayout(
           {
             language: locale,
-            preview: separated(who, named.join(", ")),
+            preview: labels.paragraphs[0] ?? heading,
             eyebrow: labels.contact,
-            heading: who,
+            heading,
+            paragraphs: labels.paragraphs,
             rows,
-            ...(message.message ? { quote: { label: labels.message, text: message.message } } : {}),
-            button: answer,
-            footer,
+            closing: labels.closing,
           },
           design,
-          logos,
+          { light: Boolean(image), dark: Boolean(darkImage) },
         ),
         inlineImages,
       });
-      // The automatic reply: never stops the message itself from counting as sent.
-      const reply = acknowledgement?.[message.locale] ?? Object.values(acknowledgement ?? {})[0];
-      if (reply && message.email) {
-        try {
-          await sender.send({
-            from,
-            to: { name: oneLine(message.name), address: message.email },
-            replyTo: to,
-            // The form's name first, as on every email the form sends: "Contact · We received your message".
-            subject: oneLine(separated(labels.contact, reply.subject)).slice(0, 300),
-            text: [
-              reply.heading(message.name),
-              "",
-              ...reply.paragraphs,
-              ...(message.message ? ["", `${reply.messageLabel}:`, message.message] : []),
-            ].join("\n"),
-            html: emailLayout(
-              {
-                language: message.locale,
-                preview: reply.paragraphs[0] ?? reply.subject,
-                eyebrow: reply.eyebrow,
-                heading: reply.heading(message.name),
-                paragraphs: reply.paragraphs,
-                ...(message.message ? { quote: { label: reply.messageLabel, text: message.message } } : {}),
-                ...(reply.button ? { button: reply.button } : {}),
-                // The company's own signature says where it is; without one, a line to its site does.
-                ...(design.signature?.length
-                  ? {}
-                  : {
-                      footer: [
-                        {
-                          label: company,
-                          value: page ? new URL(page).origin.replace("https://", "") : site,
-                          href: page ? new URL(page).origin : `https://${site}`,
-                        },
-                      ],
-                    }),
-              },
-              design,
-              logos,
-            ),
-            inlineImages,
-          });
-        } catch (error) {
-          reportError("contact: the automatic reply failed", error);
-        }
-      }
       return { status: "sent" };
     } catch (error) {
       if (error instanceof EmailError && error.code === "invalid-message") return { status: "invalid" };

@@ -9,45 +9,24 @@ export interface ContactState {
 /** Words the email shows in one language, or in each language by code (`{ en: "Home", pt: "Casa" }`). */
 export type ContactText = string | Readonly<Record<string, string>>;
 
-/** The words the email uses around the visitor's answers, in one language. */
+/** The email's words around the visitor's answers, in one language. */
 export interface ContactLabels {
+  /** The form's name: first in the subject ("Contact · Ana · …") and in small capitals above the heading. */
+  contact: string;
+  /** Before the visitor's name in the heading: "Thank you" ("Thank you, Ana."). */
+  thanks: string;
+  /** Under the heading: what happens next, and that replying adds to the conversation. */
+  paragraphs: readonly string[];
   name: string;
+  organization: string;
   email: string;
   phone: string;
-  company: string;
   needs: string;
-  language: string;
-  /** The form's name: in the subject ("Contact · Ana") and in small capitals above the visitor's name. */
-  contact: string;
-  /** Above the visitor's message: "Message". */
   message: string;
-  /** The page the form was sent from: "Form". */
-  page: string;
-  /** When it was sent: "Sent". */
-  sent: string;
-  /** The button that answers the visitor, before their first name: "Reply to". */
-  reply: string;
-  /** The button that calls a visitor who left only a phone, before their first name: "Call". */
-  call: string;
-}
-
-/** The automatic reply to the visitor, in one language: thanks, what happens next, and their message back. */
-export interface ContactAcknowledgement {
-  /**
-   * For example "We received your message": the sender already names the company, so the subject doesn't; the
-   * form's name goes before it ("Contact · We received your message").
-   */
-  subject: string;
-  /** The heading, from the visitor's name, for example `Thank you, ${name}.`. */
-  heading: (name: string) => string;
-  /** What happens next. */
-  paragraphs: readonly string[];
-  /** Above their message: "Your message". */
-  messageLabel: string;
-  /** The small capitals above the heading, for example "Message received". */
-  eyebrow: string;
-  /** A button under their message, for example to the site. */
-  button?: { label: string; href: string };
+  /** Above the conversation's identifier: "Conversation identifier". */
+  conversation: string;
+  /** Before the company's name at the end: "Best regards,". */
+  closing: string;
 }
 
 /** The company's logo at the top of every email: a square image (PNG), sent inside the email. */
@@ -58,11 +37,15 @@ export interface EmailLogo {
 }
 
 export interface ContactActionOptions {
-  /** Where messages go, for example "contact@sharadox.com". */
+  /**
+   * The company's address, for example "contact@sharadox.com": the email goes to it and to the visitor, and replies
+   * come to it.
+   */
   to: string;
   /**
    * The company, for example "Sharadox". Its emails come from it by name (unless `senderName` says otherwise), and
-   * carry its name beside the logo. The subject is the form's name and the visitor's: "Contact · Name (Company)".
+   * sign off with its name. The subject is the form's name, the visitor's and the conversation's identifier:
+   * "Contact · Name (Organization) · 019a…".
    */
   company: string;
   /** The name emails come from; the company's by default. */
@@ -78,20 +61,8 @@ export interface ContactActionOptions {
    * name sits beside the logo, its signature), in the one layout every mail app shows alike.
    */
   design?: EmailDesign;
-  /** Each language's name in the email, by code; English names of common languages by default. */
-  languageNames?: Readonly<Record<string, string>>;
-  /**
-   * The automatic reply to visitors who left an email, by language (the form's locale; the first one otherwise). It
-   * comes from the same sender, and replying to it reaches `to`. None by default.
-   */
-  acknowledgement?: Readonly<Record<string, ContactAcknowledgement>>;
   /** Choices the form may send, and how each is named in the email (in each language, or one); none by default. */
   choices?: Readonly<Record<string, ContactText>>;
-  /**
-   * The site's domain, for example "sharadox.com". The page the form was sent from (the "page" field) is shown only
-   * when it is on this domain or one of its subdomains.
-   */
-  site: string;
   /** "email" (the default) requires an email; "email-or-phone" accepts either way of answering. */
   reach?: ContactReach;
   /** False lets the message be empty; true by default. */
@@ -102,12 +73,12 @@ export interface ContactActionOptions {
   requireChoice?: boolean;
   /**
    * Extra single-line fields the form sends, and how each is named in the email (in each language, or one), for
-   * example `{ place: { en: "Home", pt: "Casa" } }`.
+   * example `{ place: { en: "Place", pt: "Local" } }`.
    */
   fields?: Readonly<Record<string, ContactText>>;
   /**
-   * The email's words in each language, by code, over the built-in English and Portuguese ones. The email the company
-   * gets is in the language the visitor used the form in (English when it has no words for it).
+   * The email's words in each language, by code, over the built-in English and Portuguese ones. The email is in the
+   * language the visitor used the form in (English when it has no words for it).
    */
   labels?: Readonly<Record<string, Partial<ContactLabels>>>;
   /** Messages per address per window; 5 per hour by default. */
@@ -122,6 +93,6 @@ export interface ContactActionOptions {
   createSender?: (configuration: EmailServerConfiguration) => EmailSender;
   /** Where failures are reported; `console.error` by default. */
   reportError?: (message: string, error: unknown) => void;
-  /** Now, for the time the email shows (tests). */
-  now?: () => Date;
+  /** A new conversation identifier, a UUID version 7 by default (tests give their own). */
+  identifier?: () => string;
 }
