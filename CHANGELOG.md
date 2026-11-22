@@ -2,6 +2,10 @@
 
 What changed in each version of `@sharadox/form-web-library`, newest first.
 
+## 0.8.1
+
+Sharadox libraries are required with caret ranges, so their patches reach every site (email-web-library 0.6.1 among them).
+
 ## 0.8.0
 
 - **Breaking:** the contact form sends one email, to both the visitor and the company (`to`), so they share one conversation: replies go to the company (`Reply-To`), so replying the visitor reaches it, and replying to all the company reaches the visitor, never the sending address. The automatic reply and its `acknowledgement` option are gone.
