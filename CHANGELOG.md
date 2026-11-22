@@ -2,6 +2,15 @@
 
 What changed in each version of `@sharadox/form-web-library`, newest first.
 
+## 0.8.0
+
+- **Breaking:** the contact form sends one email, to both the visitor and the company (`to`), so they share one conversation: replies go to the company (`Reply-To`), so replying the visitor reaches it, and replying to all the company reaches the visitor, never the sending address. The automatic reply and its `acknowledgement` option are gone.
+- Its subject is "Contact · Name (Organization) · <conversation identifier>", a UUID version 7 (`identifier`), in the language the visitor used the form in ("Contacto · …").
+- It thanks the visitor by name, says the company will answer within a working day and that replying adds to the conversation, lists every detail (name, organization, email, phone, the site's fields, the needs one per line, the message keeping its lines, the conversation identifier), and signs off "Best regards, <Company>." The form page, language, time and IP are no longer shown (the visitor sees the email too).
+- Built-in English and Portuguese words (`CONTACT_LABELS`), `labels` by language, choices and fields named in each language. **Breaking:** `ContactLabels` has new words; `site`, `languageNames`, `now`, `formPage` and `LANGUAGE_NAMES` are gone.
+- It comes from the company by name (or `senderName`), no longer "<company> Web Application".
+- The email uses email-web-library's one layout, the same in every mail app; `darkLogo` is the white logo for dark themes.
+
 ## 0.6.1
 
 Llms.txt summary names the phone field
