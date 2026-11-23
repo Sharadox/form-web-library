@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: Sharadox/git-hub-action-library/publish@v0.2.1
+      - uses: Sharadox/git-hub-action-library/publish@v0.2.2
         with:
           tasks: format:check lint type-check test:unit test:benchmark build
           turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: Sharadox/git-hub-action-library/prerelease@v0.2.1
+      - uses: Sharadox/git-hub-action-library/prerelease@v0.2.2
         with:
           turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
           turborepo-team: ${{ vars.TURBOREPO_TEAM }}
@@ -40,6 +40,4 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: Sharadox/git-hub-action-library/prerelease-cleanup@v0.2.1
-        with:
-          npm-token: ${{ secrets.NPM_TOKEN }}
+      - uses: Sharadox/git-hub-action-library/prerelease-cleanup@v0.2.2
