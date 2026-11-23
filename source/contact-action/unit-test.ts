@@ -167,6 +167,22 @@ describe("createContactAction", () => {
     expect(send.mock.calls[1]![0].from.address).toBe("hello@example.com");
   });
 
+  test("through Amazon SES (no server user) the sender address must be given, else nothing is sent", async () => {
+    const amazon = { kind: "amazon-ses" as const, region: "us-east-1", credentials: async () => ({}) as never };
+    const reportError = vi.fn();
+    vi.stubEnv("EMAIL_SENDER_ADDRESS", "");
+    const action = create({ readConfiguration: () => amazon, senderAddress: undefined, reportError });
+    expect((await action(form(valid), "5.5.5.5")).status).toBe("failed");
+    expect(send).not.toHaveBeenCalled();
+    expect(reportError.mock.calls[0]![1]).toMatchObject({
+      code: "configuration",
+      message: "EMAIL_SENDER_ADDRESS is missing (Amazon SES has no server user to send as)",
+    });
+    vi.stubEnv("EMAIL_SENDER_ADDRESS", "contact@web.sharadox.com");
+    expect((await action(form(valid), "5.5.5.6")).status).toBe("sent");
+    expect(send.mock.calls[0]![0].from.address).toBe("contact@web.sharadox.com");
+  });
+
   test("fakes success for bots without sending, and reports invalid input", async () => {
     const action = create();
     expect(await action(form({ ...valid, website: "spam" }), "1.2.3.4")).toEqual({ status: "sent" });

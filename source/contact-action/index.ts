@@ -164,11 +164,18 @@ export function createContactAction({
         ...(darkImage ? [{ id: "logo-dark", ...darkImage }] : []),
       ];
       const configuration = readConfiguration();
+      // The given address, else the environment's, else the SMTP login (Amazon SES has none).
+      const address =
+        senderAddress ||
+        process.env.EMAIL_SENDER_ADDRESS ||
+        ("username" in configuration ? configuration.username : "");
+      if (!address)
+        throw new EmailError(
+          "configuration",
+          "EMAIL_SENDER_ADDRESS is missing (Amazon SES has no server user to send as)",
+        );
       await createSender(configuration).send({
-        from: {
-          name: senderName,
-          address: senderAddress || process.env.EMAIL_SENDER_ADDRESS || configuration.username,
-        },
+        from: { name: senderName, address },
         // One email to both: the visitor (when they left an email) and the company, in one conversation.
         to: [...(message.email ? [{ name: oneLine(message.name), address: message.email }] : []), to],
         // Replies go to the company, never to the sending address; replying to all, the company reaches the visitor.

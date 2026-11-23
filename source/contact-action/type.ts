@@ -50,7 +50,10 @@ export interface ContactActionOptions {
   company: string;
   /** The name emails come from; the company's by default. */
   senderName?: string;
-  /** The sender address (an address the email server may send from); `EMAIL_SENDER_ADDRESS` or the server user. */
+  /**
+   * The sender address (an address the email server may send from); `EMAIL_SENDER_ADDRESS` or the SMTP server user.
+   * Required one way or the other with Amazon SES, which has no server user.
+   */
   senderAddress?: string;
   /** The company's logo at the top of every email, in black, with a thin white outline for darkened mail apps. */
   logo?: () => Promise<EmailLogo>;

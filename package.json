@@ -1,6 +1,6 @@
 {
   "name": "@sharadox/form-web-library",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Forms: a phone field with every country's flag and calling code, and on the server field reading, honeypot and fill-time bot checks, rate limiting and a contact form action that emails messages with the visitor as reply-to.",
   "private": false,
   "license": "SEE LICENSE IN LICENCA.md",
@@ -88,9 +88,9 @@
     "vitest": "^5.1.0"
   },
   "dependencies": {
-    "@sharadox/email-web-library": "^0.6.1",
+    "@sharadox/email-web-library": "^0.7.0",
     "@sharadox/icon-web-library": "^0.6.1",
-    "@sharadox/web-library": "^0.10.0"
+    "@sharadox/web-library": "^0.11.0"
   },
   "peerDependencies": {
     "react": ">=19"
