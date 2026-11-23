@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@sharadox/email-web-library':
-        specifier: 0.7.0-amazon-ses.42
-        version: 0.7.0-amazon-ses.42
+        specifier: ^0.7.0
+        version: 0.7.0
       '@sharadox/icon-web-library':
         specifier: ^0.6.1
         version: 0.6.1(react@19.3.1)
       '@sharadox/web-library':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: ^0.11.0
+        version: 0.11.0
     devDependencies:
       '@sharadox/es-lint-configuration-web-library':
         specifier: ^0.1.2
@@ -511,8 +511,8 @@ packages:
   '@rolldown/pluginutils@1.1.0':
     resolution: {integrity: sha512-K+NU2HDCEem4sClgHH4ZZXwdJeNFkJo+hRk479DIwdIviAPN2hFJH1KHHwg8CxHQXvi0M5XY4deTXINfIiSG6w==}
 
-  '@sharadox/email-web-library@0.7.0-amazon-ses.42':
-    resolution: {integrity: sha512-/V6T1iL4ROHe3h3jtiySTq4PS5rNVNQgjPr8cWJjSpaEVVTG5drdiNWW2FvluumPwkIkkQDBHcuVtAbb3t1wDg==}
+  '@sharadox/email-web-library@0.7.0':
+    resolution: {integrity: sha512-3YB7nMd4fM9BhGED413KLr0A8FIb1iGYkrIBBkvbwqKMOh0AWxA51R3YaSCxn5MlZx8Qp8vqXPS160jti8qoUg==}
     engines: {node: '>=26'}
 
   '@sharadox/es-lint-configuration-web-library@0.1.2':
@@ -566,8 +566,8 @@ packages:
       '@vitest/coverage-v8': '>=5'
       vitest: '>=5'
 
-  '@sharadox/web-library@0.10.0':
-    resolution: {integrity: sha512-AJ73a6ULYqAOwUVpaYOPQbvwObCUD0O9NRzP5ASKj7jiGbcs+H7iDZ6bHYdlaxCSo1NTWhne+0hyAvg8JfXMZg==}
+  '@sharadox/web-library@0.11.0':
+    resolution: {integrity: sha512-ELDop1Y1M2se8oJb5qPe8OhLkW8tvlIj5Ik8rYQblUI4bSjoOybkAi0TV2vh4ifVBmr5v+sAIX7zT/Cep9FC1g==}
     engines: {node: '>=26'}
 
   '@shikijs/engine-oniguruma@3.23.0':
@@ -2176,10 +2176,10 @@ snapshots:
 
   '@rolldown/pluginutils@1.1.0': {}
 
-  '@sharadox/email-web-library@0.7.0-amazon-ses.42':
+  '@sharadox/email-web-library@0.7.0':
     dependencies:
       '@aws-sdk/client-sesv2': 3.1175.0
-      '@sharadox/web-library': 0.10.0
+      '@sharadox/web-library': 0.11.0
       '@vercel/oidc-aws-credentials-provider': 3.3.21
       nodemailer: 10.5.0
 
@@ -2224,7 +2224,7 @@ snapshots:
       - oxc-transform-react
       - vite
 
-  '@sharadox/web-library@0.10.0': {}
+  '@sharadox/web-library@0.11.0': {}
 
   '@shikijs/engine-oniguruma@3.23.0':
     dependencies:

@@ -88,9 +88,9 @@
     "vitest": "^5.1.0"
   },
   "dependencies": {
-    "@sharadox/email-web-library": "0.7.0-amazon-ses.42",
+    "@sharadox/email-web-library": "^0.7.0",
     "@sharadox/icon-web-library": "^0.6.1",
-    "@sharadox/web-library": "^0.10.0"
+    "@sharadox/web-library": "^0.11.0"
   },
   "peerDependencies": {
     "react": ">=19"
