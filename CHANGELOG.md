@@ -2,6 +2,10 @@
 
 What changed in each version of `@sharadox/form-web-library`, newest first.
 
+## 0.8.3
+
+Workflows from git-hub-action-library v0.2.2: npm Trusted Publishing only
+
 ## 0.8.2
 
 Contact emails can go through Amazon SES without a password (email-web-library 0.7): the sender address then comes from `senderAddress` or `EMAIL_SENDER_ADDRESS` (there is no SMTP user to fall back on), and a missing one is a configuration error, nothing sent.
