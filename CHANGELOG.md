@@ -2,6 +2,10 @@
 
 What changed in each version of `@sharadox/form-web-library`, newest first.
 
+## 0.8.2
+
+Contact emails can go through Amazon SES without a password (email-web-library 0.7): the sender address then comes from `senderAddress` or `EMAIL_SENDER_ADDRESS` (there is no SMTP user to fall back on), and a missing one is a configuration error, nothing sent.
+
 ## 0.8.1
 
 Sharadox libraries are required with caret ranges, so their patches reach every site (email-web-library 0.6.1 among them).
